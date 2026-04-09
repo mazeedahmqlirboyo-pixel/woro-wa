@@ -9,9 +9,9 @@ const JADWAL = {
   0: { label: "Malam Senin", petugas: ["Adin Muhamad Mufid", "Mohamad Khasan Bisri"] },
   1: { label: "Malam Selasa", petugas: ["Abdillah Khoironi", "Muhammad Ricky Gunawan Pratama"] },
   2: { label: "Malam Rabu", petugas: ["Aunurrofiq", "Muhammad Hadi Mafatih"] },
-  3: { label: "Malam Kamis", petugas: ["Choerul Anam", "Muhammad Burhanuddin Ramadhan"] },
+  3: { label: "Malam Kamis", petugas: ["Muchammad Haqqinnazili", "Muhammad Burhanuddin Ramadhan"] },
   4: { label: "Malam Jumat", petugas: [] }, // Tidak ada jadwal
-  5: { label: "Malam Sabtu", petugas: ["Ahmad Syarief Qornel", "Muchammad Haqqinnazili"] },
+  5: { label: "Malam Sabtu", petugas: ["Ahmad Syarief Qornel", "Choerul Anam"] },
   6: { label: "Malam Minggu", petugas: ["Abdul Wakhid", "Muhammad Hibbatullah Dzul Izzi"] }
 };
 
