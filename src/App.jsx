@@ -12,7 +12,7 @@ const JADWAL = {
   3: { label: "Malam Kamis", petugas: ["Muchammad Haqqinnazili", "Muhammad Burhanuddin Ramadhan"] },
   4: { label: "Malam Jumat", petugas: [] }, // Tidak ada jadwal
   5: { label: "Malam Sabtu", petugas: ["Ahmad Syarief Qornel", "Choerul Anam"] },
-  6: { label: "Malam Minggu", petugas: ["Abdul Wakhid", "Bpk. Agus Wahyudin"] }
+  6: { label: "Malam Minggu", petugas: ["Abdul Wakhid", "Agus Wahyudin"] }
 };
 
 // Daftar Semua Bapak untuk Opsi Sorogan
@@ -28,7 +28,7 @@ const SEMUA_BAPAK = [
   "Ahmad Syarief Qornel",
   "Muhammad Hadi Mafatih",
   "Abdul Wakhid",
-  "Bpk. Agus Wahyudin"
+  "Agus Wahyudin"
 ];
 
 // Hanya Sapaan yang Berubah
