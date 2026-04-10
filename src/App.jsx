@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 
-const TARGET_PHONE = '6285194947325';
+const TARGET_PHONE = '628889583421';
 
 // Mapping: new Date().getDay() menghasilkan index 0 (Minggu) sampai 6 (Sabtu)
 const JADWAL = {
@@ -134,11 +134,10 @@ export default function App() {
   const renderTabButton = (id, label) => (
     <button
       onClick={() => setActiveTab(id)}
-      className={`px-3 py-3.5 font-bold text-[13px] w-full transition-all ${
-        activeTab === id
+      className={`px-3 py-3.5 font-bold text-[13px] w-full transition-all ${activeTab === id
           ? 'bg-indigo-600 text-white shadow-sm'
           : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-indigo-600'
-      }`}
+        }`}
     >
       {label}
     </button>
@@ -147,7 +146,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center pb-8 font-sans">
       <div className="w-full max-w-md bg-white min-h-screen shadow-xl relative pb-6 sm:my-8 sm:min-h-0 sm:rounded-[2rem] sm:border border-gray-200 overflow-hidden">
-        
+
         {/* Header - Sticky */}
         <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm shadow-sm">
           <div className="flex items-center gap-3 px-5 pt-4 pb-3">
@@ -159,7 +158,7 @@ export default function App() {
               <p className="text-[11px] text-gray-500 font-bold tracking-wider">PP. ALBAQOROH</p>
             </div>
           </div>
-          
+
           <div className="flex w-full divide-x divide-gray-100 bg-white border-b border-gray-200 shadow-sm">
             {renderTabButton('musylail', 'Musylail')}
             {renderTabButton('hmq', 'Sorogan HMQ')}
