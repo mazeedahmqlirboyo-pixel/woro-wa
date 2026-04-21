@@ -1,34 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen } from 'react-icons/fi';
+import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 
 const TARGET_PHONE = '628889583421';
 
 // Mapping: new Date().getDay() menghasilkan index 0 (Minggu) sampai 6 (Sabtu)
 const JADWAL = {
-  0: { label: "Malam Senin", petugas: ["Adin Muhamad Mufid", "Mohamad Khasan Bisri"] },
-  1: { label: "Malam Selasa", petugas: ["Abdillah Khoironi", "Muhammad Ricky Gunawan Pratama"] },
-  2: { label: "Malam Rabu", petugas: ["Aunurrofiq", "Muhammad Hadi Mafatih"] },
-  3: { label: "Malam Kamis", petugas: ["Muchammad Haqqinnazili", "Muhammad Burhanuddin Ramadhan"] },
+  0: { label: "Malam Senin", petugas: ["Bpk. Adin Muhamad Mufid", "Bpk. Mohamad Khasan Bisri"] },
+  1: { label: "Malam Selasa", petugas: ["Bpk. Abdillah Khoironi", "Bpk. Muhammad Ricky Gunawan Pratama"] },
+  2: { label: "Malam Rabu", petugas: ["Bpk. M Khoirul Anwar", "Bpk. Muhammad Hadi Mafatih"] },
+  3: { label: "Malam Kamis", petugas: ["Bpk. Muchammad Haqqinnazili", "Bpk. Muhammad Burhanuddin Ramadhan"] },
   4: { label: "Malam Jumat", petugas: [] }, // Tidak ada jadwal
-  5: { label: "Malam Sabtu", petugas: ["Ahmad Syarief Qornel", "Choerul Anam"] },
-  6: { label: "Malam Minggu", petugas: ["Abdul Wakhid", "Agus Wahyudin"] }
+  5: { label: "Malam Sabtu", petugas: ["Bpk. Ahmad Syarief Qornel", "Bpk. Choerul Anam"] },
+  6: { label: "Malam Minggu", petugas: ["Bpk. Abdul Wakhid", "Bpk. Agus Wahyudin"] }
 };
 
 // Daftar Semua Bapak untuk Opsi Sorogan
 const SEMUA_BAPAK = [
-  "Adin Muhamad Mufid",
-  "Mohamad Khasan Bisri",
-  "Abdillah Khoironi",
-  "Muhammad Ricky Gunawan Pratama",
-  "Aunurrofiq",
-  "Muchammad Haqqinnazili",
-  "Choerul Anam",
-  "Muhammad Burhanuddin Ramadhan",
-  "Ahmad Syarief Qornel",
-  "Muhammad Hadi Mafatih",
-  "Abdul Wakhid",
-  "Agus Wahyudin"
+  "Bpk. Adin Muhamad Mufid",
+  "Bpk. Mohamad Khasan Bisri",
+  "Bpk. Abdillah Khoironi",
+  "Bpk. Muhammad Ricky Gunawan Pratama",
+  "Bpk. M Khoirul Anwar",
+  "Bpk. Muchammad Haqqinnazili",
+  "Bpk. Choerul Anam",
+  "Bpk. Muhammad Burhanuddin Ramadhan",
+  "Bpk. Ahmad Syarief Qornel",
+  "Bpk. Muhammad Hadi Mafatih",
+  "Bpk. Abdul Wakhid",
+  "Bpk. Agus Wahyudin"
 ];
 
 // Hanya Sapaan yang Berubah
@@ -86,7 +86,7 @@ export default function App() {
     selectedPetugas.forEach(name => {
       generated += `@${name}\n`;
     });
-    generated += `\n*Mohon untuk datang tepat waktu jam 07.45 malam sampai dengan selesai*\n\n*Dan untuk Bapak-bapak yang lain untuk senantiasa Jaga MUSYLAIL di HMQ*\n\nTerima kasih ${pray}`;
+    generated += `\n*Mohon untuk datang tepat waktu jam 08.15 malam sampai dengan selesai*\n\n*Dan untuk Bapak-bapak yang lain untuk senantiasa Jaga MUSYLAIL di HMQ*\n\nTerima kasih ${pray}`;
     setMessageMusylail(generated);
   };
 
@@ -120,14 +120,17 @@ export default function App() {
     setMessageAlbaqoroh(generated);
   };
 
-  const handleSend = (msg) => {
+  const handleCopy = (msg) => {
     if (!msg.trim()) {
       alert("Pesan kosong. Silakan klik Generate Pesan terlebih dahulu.");
       return;
     }
-    const encodedText = encodeURIComponent(msg);
-    const waUrl = `https://wa.me/${TARGET_PHONE}?text=${encodedText}`;
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    navigator.clipboard.writeText(msg).then(() => {
+      alert("Pesan berhasil disalin!");
+    }).catch(err => {
+      console.error('Gagal menyalin:', err);
+      alert("Gagal menyalin pesan.");
+    });
   };
 
   // UI HELPERS
@@ -232,15 +235,15 @@ export default function App() {
 
               <section className="pt-2">
                 <button
-                  onClick={() => handleSend(messageMusylail)}
+                  onClick={() => handleCopy(messageMusylail)}
                   disabled={!messageMusylail.trim()}
                   className={`w-full py-4 text-white font-bold text-[17px] rounded-xl flex items-center justify-center gap-2.5 transition-all ${!messageMusylail.trim()
                     ? 'bg-gray-300 text-gray-400 cursor-not-allowed shadow-none'
-                    : 'bg-green-500 hover:bg-green-600 active:bg-green-700 shadow-md active:scale-[0.98]'
+                    : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 shadow-md active:scale-[0.98]'
                     }`}
                 >
-                  <FaWhatsapp className="text-2xl" />
-                  Kirim ke WhatsApp
+                  <FiCopy className="text-2xl" />
+                  Salin Teks
                 </button>
               </section>
             </>
@@ -304,14 +307,14 @@ export default function App() {
 
               <section className="pt-2">
                 <button
-                  onClick={() => handleSend(messageHmq)}
+                  onClick={() => handleCopy(messageHmq)}
                   disabled={!messageHmq.trim()}
                   className={`w-full py-4 text-white font-bold text-[17px] rounded-xl flex items-center justify-center gap-2.5 transition-all ${!messageHmq.trim()
                     ? 'bg-gray-300 text-gray-400 cursor-not-allowed shadow-none'
-                    : 'bg-green-500 hover:bg-green-600 active:bg-green-700 shadow-md active:scale-[0.98]'
+                    : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 shadow-md active:scale-[0.98]'
                     }`}
                 >
-                  <FaWhatsapp className="text-2xl" /> Kirim ke WhatsApp
+                  <FiCopy className="text-2xl" /> Salin Teks
                 </button>
               </section>
             </>
@@ -375,14 +378,14 @@ export default function App() {
 
               <section className="pt-2">
                 <button
-                  onClick={() => handleSend(messageAlbaqoroh)}
+                  onClick={() => handleCopy(messageAlbaqoroh)}
                   disabled={!messageAlbaqoroh.trim()}
                   className={`w-full py-4 text-white font-bold text-[17px] rounded-xl flex items-center justify-center gap-2.5 transition-all ${!messageAlbaqoroh.trim()
                     ? 'bg-gray-300 text-gray-400 cursor-not-allowed shadow-none'
-                    : 'bg-green-500 hover:bg-green-600 active:bg-green-700 shadow-md active:scale-[0.98]'
+                    : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700 shadow-md active:scale-[0.98]'
                     }`}
                 >
-                  <FaWhatsapp className="text-2xl" /> Kirim ke WhatsApp
+                  <FiCopy className="text-2xl" /> Salin Teks
                 </button>
               </section>
             </>
