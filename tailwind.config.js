@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        'mazeeda-blue': '#1e3a8a',
+        'mazeeda-navy': '#172554',
+      },
       fontFamily: {
         sans: ['Outfit', 'sans-serif'],
       },
