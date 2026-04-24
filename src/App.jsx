@@ -6,13 +6,13 @@ const TARGET_PHONE = '628889583421';
 
 // Mapping: new Date().getDay() menghasilkan index 0 (Minggu) sampai 6 (Sabtu)
 const JADWAL = {
-  0: { label: "Malam Senin", petugas: ["Bpk. Adin Muhamad Mufid", "Bpk. Mohamad Khasan Bisri"] },
-  1: { label: "Malam Selasa", petugas: ["Bpk. Abdillah Khoironi", "Bpk. Muhammad Ricky Gunawan Pratama"] },
-  2: { label: "Malam Rabu", petugas: ["Bpk. M Khoirul Anwar", "Bpk. Muhammad Hadi Mafatih"] },
-  3: { label: "Malam Kamis", petugas: ["Bpk. Muchammad Haqqinnazili", "Bpk. Muhammad Burhanuddin Ramadhan"] },
+  0: { label: "Malam Senin", petugas: ["Bpk. Choerul Anam", "Bpk. Abdul Wakhid"] },
+  1: { label: "Malam Selasa", petugas: ["Bpk. Muhammad Hadi Mafatih", "Bpk. Mohamad Khasan Bisri"] },
+  2: { label: "Malam Rabu", petugas: ["Bpk. Muchammad Haqqinnazili", "Bpk. Abdillah Khoironi"] },
+  3: { label: "Malam Kamis", petugas: ["Bpk. Muhammad Ricky Gunawan Pratama", "Bpk. Ahmad Syarief Qornel"] },
   4: { label: "Malam Jumat", petugas: [] }, // Tidak ada jadwal
-  5: { label: "Malam Sabtu", petugas: ["Bpk. Ahmad Syarief Qornel", "Bpk. Choerul Anam"] },
-  6: { label: "Malam Minggu", petugas: ["Bpk. Abdul Wakhid", "Bpk. Agus Wahyudin"] }
+  5: { label: "Malam Sabtu", petugas: ["Bpk. Adin Muhamad Mufid", "Bpk. Agus Wahyudin"] },
+  6: { label: "Malam Minggu", petugas: ["Bpk. M Khoirul Anwar", "Bpk. Muhammad Burhanuddin Ramadhan"] }
 };
 
 // Daftar Semua Bapak untuk Opsi Sorogan
