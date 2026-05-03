@@ -57,6 +57,35 @@ export default function App() {
   const [selectedAlbaqoroh, setSelectedAlbaqoroh] = useState([]);
   const [messageAlbaqoroh, setMessageAlbaqoroh] = useState('');
 
+  const defaultQueue = [
+    "Bpk. Muhammad Ricky Gunawan Pratama", "Bpk. Muchammad Haqqinnazili", // Sabtu
+    "Bpk. Abdillah Khoironi", "Bpk. M Khoirul Anwar", // Ahad
+    "Bpk. Ahmad Syarief Qornel", "Bpk. Mohamad Khasan Bisri", // Senin
+    "Bpk. Adin Muhamad Mufid", "Bpk. Choerul Anam", // Selasa
+    "Bpk. Agus Wahyudin", "Bpk. Muhammad Hadi Mafatih", // Rabu
+    "Bpk. Muhammad Burhanuddin Ramadhan", "Bpk. Abdul Wakhid" // Sisa
+  ];
+
+  // STATE: EXTRA PAGI
+  const [jadwalExtraFull, setJadwalExtraFull] = useState(() => {
+    const saved = localStorage.getItem('jadwalExtra');
+    if (saved) return JSON.parse(saved);
+    return {
+      0: { label: "Ahad Pagi", petugas: ["Bpk. Abdillah Khoironi", "Bpk. M Khoirul Anwar"] },
+      1: { label: "Senin Pagi", petugas: ["Bpk. Ahmad Syarief Qornel", "Bpk. Mohamad Khasan Bisri"] },
+      2: { label: "Selasa Pagi", petugas: ["Bpk. Adin Muhamad Mufid", "Bpk. Choerul Anam"] },
+      3: { label: "Rabu Pagi", petugas: ["Bpk. Agus Wahyudin", "Bpk. Muhammad Hadi Mafatih"] },
+      4: { label: "Kamis Pagi", petugas: [] },
+      5: { label: "Jumat Pagi", petugas: [] },
+      6: { label: "Sabtu Pagi", petugas: ["Bpk. Muhammad Ricky Gunawan Pratama", "Bpk. Muchammad Haqqinnazili"] }
+    };
+  });
+
+  const [pagiIni, setPagiIni] = useState('');
+  const [petugasPagiIni, setPetugasPagiIni] = useState([]);
+  const [selectedPetugasExtra, setSelectedPetugasExtra] = useState([]);
+  const [messageExtra, setMessageExtra] = useState('');
+
   // 4 & 8. Auto Detect Hari -> Konversi "Malam Selanjutnya"
   useEffect(() => {
     const today = new Date();
@@ -66,10 +95,67 @@ export default function App() {
     setMalamIni(jadwalMalam.label);
     setPetugasMalamIni(jadwalMalam.petugas);
     setSelectedPetugas(jadwalMalam.petugas); // Select all by default
-  }, []);
+
+    const tomorrowIndex = (dayIndex + 1) % 7;
+    const jadwalPagi = jadwalExtraFull[tomorrowIndex];
+    setPagiIni(jadwalPagi.label);
+    setPetugasPagiIni(jadwalPagi.petugas);
+    setSelectedPetugasExtra(jadwalPagi.petugas);
+  }, [jadwalExtraFull]);
 
   const getRandomGreeting = () => GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
   const pray = String.fromCodePoint(0x1F64F);
+
+  // === HANDLER EXTRA ===
+  const handleAcakJadwalExtra = () => {
+    if(!window.confirm("Apakah Anda yakin ingin mengacak ulang jadwal Extra Pagi? Jadwal baru akan disimpan.")) return;
+    
+    let currentQueue = JSON.parse(localStorage.getItem('antrianExtra'));
+    if (!currentQueue || currentQueue.length !== 12) {
+      currentQueue = [...defaultQueue];
+    }
+    
+    // 2 orang terakhir yang belum kebagian minggu lalu
+    const unused = currentQueue.slice(10, 12);
+    // 10 orang yang sudah jaga diacak kembali
+    const used = currentQueue.slice(0, 10);
+    const shuffledUsed = used.sort(() => Math.random() - 0.5);
+    
+    currentQueue = [...unused, ...shuffledUsed];
+
+    const newJadwal = {
+      0: { label: "Ahad Pagi", petugas: [currentQueue[2], currentQueue[3]] },
+      1: { label: "Senin Pagi", petugas: [currentQueue[4], currentQueue[5]] },
+      2: { label: "Selasa Pagi", petugas: [currentQueue[6], currentQueue[7]] },
+      3: { label: "Rabu Pagi", petugas: [currentQueue[8], currentQueue[9]] },
+      4: { label: "Kamis Pagi", petugas: [] },
+      5: { label: "Jumat Pagi", petugas: [] },
+      6: { label: "Sabtu Pagi", petugas: [currentQueue[0], currentQueue[1]] }
+    };
+    
+    setJadwalExtraFull(newJadwal);
+    localStorage.setItem('jadwalExtra', JSON.stringify(newJadwal));
+    localStorage.setItem('antrianExtra', JSON.stringify(currentQueue));
+    alert("Jadwal Extra Pagi berhasil diacak! Dua bapak yang minggu lalu tidak kebagian, otomatis ditempatkan di Sabtu Pagi.");
+  };
+
+  const handleGenerateExtra = () => {
+    if (petugasPagiIni.length === 0) {
+      setMessageExtra(`Tidak ada jadwal Extra Besok Pagi.`);
+      return;
+    }
+    if (selectedPetugasExtra.length === 0) {
+      alert("Silakan pilih minimal satu petugas.");
+      return;
+    }
+
+    let generated = `*INFO EXTRA*\n\n${getRandomGreeting()}\n\n`;
+    selectedPetugasExtra.forEach(name => {
+      generated += `@${name}\n`;
+    });
+    generated += `\n*Mohon untuk datang tepat waktu untuk kegiatan Extra Besok Pagi jam 08:00 - 09:00 WIS.*\n\nTerima kasih ${pray}`;
+    setMessageExtra(generated);
+  };
 
   // === HANDLER MUSYLAIL ===
   const handleGenerateMusylail = () => {
@@ -137,7 +223,7 @@ export default function App() {
   const renderTabButton = (id, label) => (
     <button
       onClick={() => setActiveTab(id)}
-      className={`px-3 py-3 font-bold text-[13px] w-full transition-all duration-300 rounded-[1rem] ${activeTab === id
+      className={`px-2 py-3 font-bold text-[12px] sm:text-[13px] flex-1 whitespace-nowrap transition-all duration-300 rounded-[1rem] ${activeTab === id
           ? 'bg-white text-indigo-700 shadow-[0_2px_10px_rgb(0,0,0,0.06)]'
           : 'text-gray-500 hover:text-indigo-600 hover:bg-white/50'
         }`}
@@ -163,8 +249,9 @@ export default function App() {
           </div>
 
           <div className="px-5 pb-3">
-            <div className="flex w-full bg-gray-100/80 p-1.5 rounded-[1.25rem] shadow-inner">
+            <div className="flex flex-wrap w-full bg-gray-100/80 p-1.5 rounded-[1.25rem] shadow-inner gap-1">
               {renderTabButton('musylail', 'Musylail')}
+              {renderTabButton('extra', 'Extra Pagi')}
               {renderTabButton('hmq', 'Sorogan HMQ')}
               {renderTabButton('albaqoroh', 'S. Al-Baq')}
             </div>
@@ -256,6 +343,105 @@ export default function App() {
                 >
                   <FiCopy className="text-xl" />
                   Salin Teks Pesan
+                </button>
+              </section>
+            </div>
+          )}
+
+          {/* VIEW: EXTRA PAGI */}
+          {activeTab === 'extra' && (
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+              <section className="bg-gradient-to-br from-orange-50 to-white border border-orange-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                <h2 className="text-xs font-black text-center text-orange-400 tracking-[0.2em] mb-2 uppercase relative z-10">Piket Extra Besok</h2>
+                <div className="text-4xl font-black text-center text-orange-900 mb-6 tracking-tight relative z-10">{pagiIni}</div>
+
+                {petugasPagiIni.length > 0 ? (
+                  <div className="space-y-3 relative z-10">
+                    <label className="flex items-center gap-4 cursor-pointer bg-orange-600/5 px-5 py-3 rounded-2xl hover:bg-orange-600/10 transition-colors">
+                      <div className="relative flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedPetugasExtra.length > 0 && selectedPetugasExtra.length === petugasPagiIni.length}
+                          onChange={(e) => setSelectedPetugasExtra(e.target.checked ? petugasPagiIni : [])}
+                          className="peer w-6 h-6 appearance-none rounded-lg border-2 border-orange-200 checked:bg-orange-600 checked:border-orange-600 transition-all cursor-pointer"
+                        />
+                        <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
+                      </div>
+                      <span className="font-extrabold text-[15px] text-orange-900">Pilih Semua Bapak</span>
+                    </label>
+                    {petugasPagiIni.map((petugas, idx) => (
+                      <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-orange-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-orange-200 transition-all">
+                        <div className="relative flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedPetugasExtra.includes(petugas)}
+                            onChange={() => {
+                              if (selectedPetugasExtra.includes(petugas)) setSelectedPetugasExtra(selectedPetugasExtra.filter(p => p !== petugas));
+                              else setSelectedPetugasExtra([...selectedPetugasExtra, petugas]);
+                            }}
+                            className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-orange-500 checked:border-orange-500 transition-all cursor-pointer"
+                          />
+                          <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
+                        </div>
+                        <span className="group-hover:text-orange-900 transition-colors">{petugas}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-white/80 backdrop-blur-sm px-6 py-5 rounded-2xl font-bold text-orange-400 border border-orange-100/50 text-center shadow-sm relative z-10">
+                    ✨ Tidak ada jadwal Extra Besok Pagi
+                  </div>
+                )}
+                
+                <div className="mt-6 pt-6 border-t border-orange-100/50 relative z-10">
+                   <button
+                     onClick={handleAcakJadwalExtra}
+                     className="w-full py-3 bg-white hover:bg-orange-50 border-2 border-dashed border-orange-200 text-orange-600 font-bold text-[14px] rounded-xl transition-all flex justify-center items-center gap-2"
+                   >
+                     <FiRefreshCw /> Acak Ulang Jadwal
+                   </button>
+                   <p className="text-[11px] text-center text-orange-400 mt-2">
+                     Mengacak ulang akan membagikan 12 bapak ke 6 hari secara acak.
+                   </p>
+                </div>
+              </section>
+
+              <section>
+                <button
+                  onClick={handleGenerateExtra}
+                  className="w-full py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-400 hover:to-red-400 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-orange-200 flex justify-center items-center gap-3 transition-all"
+                >
+                  <FiRefreshCw className={`text-xl ${messageExtra ? "" : "animate-spin-slow"}`} />
+                  Generate Pesan Extra
+                </button>
+              </section>
+
+              <section className="space-y-3">
+                <h2 className="text-sm font-bold text-orange-900/60 flex items-center gap-2 uppercase tracking-wider pl-1">
+                  <FiEdit3 className="text-lg" /> Preview & Edit
+                </h2>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-200 to-red-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                  <textarea
+                    className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-orange-100 focus:border-orange-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
+                    placeholder="Pesan Extra otomatis muncul di sini..."
+                    value={messageExtra}
+                    onChange={(e) => setMessageExtra(e.target.value)}
+                  />
+                </div>
+              </section>
+
+              <section>
+                <button
+                  onClick={() => handleCopy(messageExtra)}
+                  disabled={!messageExtra.trim()}
+                  className={`w-full py-4 font-extrabold text-[16px] rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 ${!messageExtra.trim()
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-900 hover:bg-gray-800 text-white shadow-lg shadow-gray-200 active:scale-[0.98]'
+                    }`}
+                >
+                  <FiCopy className="text-xl" /> Salin Teks
                 </button>
               </section>
             </div>
