@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy } from 'react-icons/fi';
+import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy, FiInfo } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 
 const TARGET_PHONE = '628889583421';
@@ -43,6 +43,13 @@ const GREETINGS = [
 export default function App() {
   const [activeTab, setActiveTab] = useState('musylail');
 
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type }), 3000);
+  };
+
   // STATE: MUSYLAIL
   const [malamIni, setMalamIni] = useState('');
   const [petugasMalamIni, setPetugasMalamIni] = useState([]);
@@ -61,21 +68,21 @@ export default function App() {
     "Bpk. Muhammad Ricky Gunawan Pratama", "Bpk. Muchammad Haqqinnazili", // Sabtu
     "Bpk. Abdillah Khoironi", "Bpk. M Khoirul Anwar", // Ahad
     "Bpk. Ahmad Syarief Qornel", "Bpk. Mohamad Khasan Bisri", // Senin
-    "Bpk. Adin Muhamad Mufid", "Bpk. Choerul Anam", // Selasa
+    "Bpk. Muhammad Burhanuddin Ramadhan", "Bpk. Abdul Wakhid", // Selasa
     "Bpk. Agus Wahyudin", "Bpk. Muhammad Hadi Mafatih", // Rabu
-    "Bpk. Muhammad Burhanuddin Ramadhan", "Bpk. Abdul Wakhid" // Sisa
+    "Bpk. Adin Muhamad Mufid", "Bpk. Choerul Anam" // Kamis
   ];
 
   // STATE: EXTRA PAGI
   const [jadwalExtraFull, setJadwalExtraFull] = useState(() => {
-    const saved = localStorage.getItem('jadwalExtra');
+    const saved = localStorage.getItem('jadwalExtraV2');
     if (saved) return JSON.parse(saved);
     return {
       0: { label: "Ahad Pagi", petugas: ["Bpk. Abdillah Khoironi", "Bpk. M Khoirul Anwar"] },
       1: { label: "Senin Pagi", petugas: ["Bpk. Ahmad Syarief Qornel", "Bpk. Mohamad Khasan Bisri"] },
-      2: { label: "Selasa Pagi", petugas: ["Bpk. Adin Muhamad Mufid", "Bpk. Choerul Anam"] },
+      2: { label: "Selasa Pagi", petugas: ["Bpk. Muhammad Burhanuddin Ramadhan", "Bpk. Abdul Wakhid"] },
       3: { label: "Rabu Pagi", petugas: ["Bpk. Agus Wahyudin", "Bpk. Muhammad Hadi Mafatih"] },
-      4: { label: "Kamis Pagi", petugas: [] },
+      4: { label: "Kamis Pagi", petugas: ["Bpk. Adin Muhamad Mufid", "Bpk. Choerul Anam"] },
       5: { label: "Jumat Pagi", petugas: [] },
       6: { label: "Sabtu Pagi", petugas: ["Bpk. Muhammad Ricky Gunawan Pratama", "Bpk. Muchammad Haqqinnazili"] }
     };
@@ -110,33 +117,28 @@ export default function App() {
   const handleAcakJadwalExtra = () => {
     if(!window.confirm("Apakah Anda yakin ingin mengacak ulang jadwal Extra Pagi? Jadwal baru akan disimpan.")) return;
     
-    let currentQueue = JSON.parse(localStorage.getItem('antrianExtra'));
+    let currentQueue = JSON.parse(localStorage.getItem('antrianExtraV2'));
     if (!currentQueue || currentQueue.length !== 12) {
       currentQueue = [...defaultQueue];
     }
     
-    // 2 orang terakhir yang belum kebagian minggu lalu
-    const unused = currentQueue.slice(10, 12);
-    // 10 orang yang sudah jaga diacak kembali
-    const used = currentQueue.slice(0, 10);
-    const shuffledUsed = used.sort(() => Math.random() - 0.5);
-    
-    currentQueue = [...unused, ...shuffledUsed];
+    // Semua 12 bapak diacak untuk 6 hari (Sabtu - Kamis)
+    const shuffledQueue = currentQueue.sort(() => Math.random() - 0.5);
 
     const newJadwal = {
-      0: { label: "Ahad Pagi", petugas: [currentQueue[2], currentQueue[3]] },
-      1: { label: "Senin Pagi", petugas: [currentQueue[4], currentQueue[5]] },
-      2: { label: "Selasa Pagi", petugas: [currentQueue[6], currentQueue[7]] },
-      3: { label: "Rabu Pagi", petugas: [currentQueue[8], currentQueue[9]] },
-      4: { label: "Kamis Pagi", petugas: [] },
+      0: { label: "Ahad Pagi", petugas: [shuffledQueue[2], shuffledQueue[3]] },
+      1: { label: "Senin Pagi", petugas: [shuffledQueue[4], shuffledQueue[5]] },
+      2: { label: "Selasa Pagi", petugas: [shuffledQueue[6], shuffledQueue[7]] },
+      3: { label: "Rabu Pagi", petugas: [shuffledQueue[8], shuffledQueue[9]] },
+      4: { label: "Kamis Pagi", petugas: [shuffledQueue[10], shuffledQueue[11]] },
       5: { label: "Jumat Pagi", petugas: [] },
-      6: { label: "Sabtu Pagi", petugas: [currentQueue[0], currentQueue[1]] }
+      6: { label: "Sabtu Pagi", petugas: [shuffledQueue[0], shuffledQueue[1]] }
     };
     
     setJadwalExtraFull(newJadwal);
-    localStorage.setItem('jadwalExtra', JSON.stringify(newJadwal));
-    localStorage.setItem('antrianExtra', JSON.stringify(currentQueue));
-    alert("Jadwal Extra Pagi berhasil diacak! Dua bapak yang minggu lalu tidak kebagian, otomatis ditempatkan di Sabtu Pagi.");
+    localStorage.setItem('jadwalExtraV2', JSON.stringify(newJadwal));
+    localStorage.setItem('antrianExtraV2', JSON.stringify(shuffledQueue));
+    showToast("Jadwal Extra Pagi berhasil diacak! Semua 12 bapak dibagikan secara merata ke 6 hari.", "success");
   };
 
   const handleGenerateExtra = () => {
@@ -145,7 +147,7 @@ export default function App() {
       return;
     }
     if (selectedPetugasExtra.length === 0) {
-      alert("Silakan pilih minimal satu petugas.");
+      showToast("Silakan pilih minimal satu petugas.", "error");
       return;
     }
 
@@ -164,7 +166,7 @@ export default function App() {
       return;
     }
     if (selectedPetugas.length === 0) {
-      alert("Silakan pilih minimal satu petugas.");
+      showToast("Silakan pilih minimal satu petugas.", "error");
       return;
     }
 
@@ -179,7 +181,7 @@ export default function App() {
   // === HANDLER HMQ ===
   const handleGenerateHmq = () => {
     if (selectedHmq.length === 0) {
-      alert("Silakan pilih minimal satu bapak untuk disorogan.");
+      showToast("Silakan pilih minimal satu bapak untuk disorogan.", "error");
       return;
     }
 
@@ -194,7 +196,7 @@ export default function App() {
   // === HANDLER AL-BAQOROH ===
   const handleGenerateAlbaqoroh = () => {
     if (selectedAlbaqoroh.length === 0) {
-      alert("Silakan pilih minimal satu bapak untuk disorogan.");
+      showToast("Silakan pilih minimal satu bapak untuk disorogan.", "error");
       return;
     }
 
@@ -208,14 +210,14 @@ export default function App() {
 
   const handleCopy = (msg) => {
     if (!msg.trim()) {
-      alert("Pesan kosong. Silakan klik Generate Pesan terlebih dahulu.");
+      showToast("Pesan kosong. Silakan klik Generate Pesan terlebih dahulu.", "error");
       return;
     }
     navigator.clipboard.writeText(msg).then(() => {
-      alert("Pesan berhasil disalin!");
+      showToast("Teks pesan berhasil disalin ke clipboard! ✨", "success");
     }).catch(err => {
       console.error('Gagal menyalin:', err);
-      alert("Gagal menyalin pesan.");
+      showToast("Gagal menyalin pesan.", "error");
     });
   };
 
@@ -234,6 +236,17 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-100 via-white to-purple-100 flex flex-col items-center pb-8 font-sans selection:bg-indigo-200 selection:text-indigo-900">
+      
+      {/* TOAST NOTIFICATION */}
+      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 transform ${toast.show ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95 pointer-events-none'}`}>
+        <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md ${toast.type === 'success' ? 'bg-emerald-600/95 border-emerald-500 text-white shadow-emerald-500/30' : 'bg-red-500/95 border-red-400 text-white shadow-red-500/30'}`}>
+          <div className="bg-white/20 p-2 rounded-full">
+            {toast.type === 'success' ? <FiCheckSquare className="text-xl" /> : <FiInfo className="text-xl" />}
+          </div>
+          <span className="font-extrabold text-[15px]">{toast.message}</span>
+        </div>
+      </div>
+
       <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl min-h-screen shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative pb-6 sm:my-10 sm:min-h-0 sm:rounded-[2.5rem] border border-white overflow-hidden transition-all duration-500">
 
         {/* Header - Sticky */}
