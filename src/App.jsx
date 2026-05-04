@@ -68,19 +68,19 @@ export default function App() {
     "Bpk. Muhammad Ricky Gunawan Pratama", "Bpk. Muchammad Haqqinnazili", // Sabtu
     "Bpk. Abdillah Khoironi", "Bpk. M Khoirul Anwar", // Ahad
     "Bpk. Ahmad Syarief Qornel", "Bpk. Mohamad Khasan Bisri", // Senin
-    "Bpk. Muhammad Burhanuddin Ramadhan", "Bpk. Abdul Wakhid", // Selasa
+    "Bpk. Abdul Wakhid", "Bpk. Muhammad Burhanuddin Ramadhan", // Selasa
     "Bpk. Agus Wahyudin", "Bpk. Muhammad Hadi Mafatih", // Rabu
     "Bpk. Adin Muhamad Mufid", "Bpk. Choerul Anam" // Kamis
   ];
 
   // STATE: EXTRA PAGI
   const [jadwalExtraFull, setJadwalExtraFull] = useState(() => {
-    const saved = localStorage.getItem('jadwalExtraV2');
+    const saved = localStorage.getItem('jadwalExtraV3');
     if (saved) return JSON.parse(saved);
     return {
       0: { label: "Ahad Pagi", petugas: ["Bpk. Abdillah Khoironi", "Bpk. M Khoirul Anwar"] },
       1: { label: "Senin Pagi", petugas: ["Bpk. Ahmad Syarief Qornel", "Bpk. Mohamad Khasan Bisri"] },
-      2: { label: "Selasa Pagi", petugas: ["Bpk. Muhammad Burhanuddin Ramadhan", "Bpk. Abdul Wakhid"] },
+      2: { label: "Selasa Pagi", petugas: ["Bpk. Abdul Wakhid", "Bpk. Muhammad Burhanuddin Ramadhan"] },
       3: { label: "Rabu Pagi", petugas: ["Bpk. Agus Wahyudin", "Bpk. Muhammad Hadi Mafatih"] },
       4: { label: "Kamis Pagi", petugas: ["Bpk. Adin Muhamad Mufid", "Bpk. Choerul Anam"] },
       5: { label: "Jumat Pagi", petugas: [] },
@@ -117,7 +117,7 @@ export default function App() {
   const handleAcakJadwalExtra = () => {
     if(!window.confirm("Apakah Anda yakin ingin mengacak ulang jadwal Extra Pagi? Jadwal baru akan disimpan.")) return;
     
-    let currentQueue = JSON.parse(localStorage.getItem('antrianExtraV2'));
+    let currentQueue = JSON.parse(localStorage.getItem('antrianExtraV3'));
     if (!currentQueue || currentQueue.length !== 12) {
       currentQueue = [...defaultQueue];
     }
@@ -136,8 +136,8 @@ export default function App() {
     };
     
     setJadwalExtraFull(newJadwal);
-    localStorage.setItem('jadwalExtraV2', JSON.stringify(newJadwal));
-    localStorage.setItem('antrianExtraV2', JSON.stringify(shuffledQueue));
+    localStorage.setItem('jadwalExtraV3', JSON.stringify(newJadwal));
+    localStorage.setItem('antrianExtraV3', JSON.stringify(shuffledQueue));
     showToast("Jadwal Extra Pagi berhasil diacak! Semua 12 bapak dibagikan secara merata ke 6 hari.", "success");
   };
 
