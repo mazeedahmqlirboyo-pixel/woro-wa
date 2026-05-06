@@ -6,13 +6,13 @@ const TARGET_PHONE = '628889583421';
 
 // Mapping: new Date().getDay() menghasilkan index 0 (Minggu) sampai 6 (Sabtu)
 const JADWAL = {
-  0: { label: "Malam Senin", petugas: ["Bpk. Choerul Anam", "Bpk. Abdul Wakhid"] },
-  1: { label: "Malam Selasa", petugas: ["Bpk. Muhammad Hadi Mafatih", "Bpk. Mohamad Khasan Bisri"] },
-  2: { label: "Malam Rabu", petugas: ["Bpk. Muchammad Haqqinnazili", "Bpk. Abdillah Khoironi"] },
-  3: { label: "Malam Kamis", petugas: ["Bpk. Muhammad Ricky Gunawan Pratama", "Bpk. Ahmad Syarief Qornel"] },
+  0: { label: "Malam Senin", petugas: ["Bpk. Choerul Anam", "Bpk. Muhammad Burhanuddin Ramadhan"] },
+  1: { label: "Malam Selasa", petugas: ["Bpk. Abdul Wakhid", "Bpk. Ahmad Syarief Qornel"] },
+  2: { label: "Malam Rabu", petugas: ["Bpk. Muchammad Haqqinnazili", "Bpk. Adin Muhamad Mufid"] },
+  3: { label: "Malam Kamis", petugas: ["Bpk. Muhammad Ricky Gunawan Pratama", "Bpk. Mohamad Khasan Bisri"] },
   4: { label: "Malam Jumat", petugas: [] }, // Tidak ada jadwal
-  5: { label: "Malam Sabtu", petugas: ["Bpk. Adin Muhamad Mufid", "Bpk. Agus Wahyudin"] },
-  6: { label: "Malam Minggu", petugas: ["Bpk. M Khoirul Anwar", "Bpk. Muhammad Burhanuddin Ramadhan"] }
+  5: { label: "Malam Sabtu", petugas: ["Bpk. Abdillah Khoironi", "Bpk. Agus Wahyudin"] },
+  6: { label: "Malam Minggu", petugas: ["Bpk. M Khoirul Anwar", "Bpk. Muhammad Hadi Mafatih"] }
 };
 
 // Daftar Semua Bapak untuk Opsi Sorogan
@@ -115,13 +115,13 @@ export default function App() {
 
   // === HANDLER EXTRA ===
   const handleAcakJadwalExtra = () => {
-    if(!window.confirm("Apakah Anda yakin ingin mengacak ulang jadwal Extra Pagi? Jadwal baru akan disimpan.")) return;
-    
+    if (!window.confirm("Apakah Anda yakin ingin mengacak ulang jadwal Extra Pagi? Jadwal baru akan disimpan.")) return;
+
     let currentQueue = JSON.parse(localStorage.getItem('antrianExtraV3'));
     if (!currentQueue || currentQueue.length !== 12) {
       currentQueue = [...defaultQueue];
     }
-    
+
     // Semua 12 bapak diacak untuk 6 hari (Sabtu - Kamis)
     const shuffledQueue = currentQueue.sort(() => Math.random() - 0.5);
 
@@ -134,7 +134,7 @@ export default function App() {
       5: { label: "Jumat Pagi", petugas: [] },
       6: { label: "Sabtu Pagi", petugas: [shuffledQueue[0], shuffledQueue[1]] }
     };
-    
+
     setJadwalExtraFull(newJadwal);
     localStorage.setItem('jadwalExtraV3', JSON.stringify(newJadwal));
     localStorage.setItem('antrianExtraV3', JSON.stringify(shuffledQueue));
@@ -226,8 +226,8 @@ export default function App() {
     <button
       onClick={() => setActiveTab(id)}
       className={`px-2 py-3 font-bold text-[12px] sm:text-[13px] flex-1 whitespace-nowrap transition-all duration-300 rounded-[1rem] ${activeTab === id
-          ? 'bg-white text-indigo-700 shadow-[0_2px_10px_rgb(0,0,0,0.06)]'
-          : 'text-gray-500 hover:text-indigo-600 hover:bg-white/50'
+        ? 'bg-white text-indigo-700 shadow-[0_2px_10px_rgb(0,0,0,0.06)]'
+        : 'text-gray-500 hover:text-indigo-600 hover:bg-white/50'
         }`}
     >
       {label}
@@ -236,7 +236,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-100 via-white to-purple-100 flex flex-col items-center pb-8 font-sans selection:bg-indigo-200 selection:text-indigo-900">
-      
+
       {/* TOAST NOTIFICATION */}
       <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 transform ${toast.show ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95 pointer-events-none'}`}>
         <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md ${toast.type === 'success' ? 'bg-emerald-600/95 border-emerald-500 text-white shadow-emerald-500/30' : 'bg-red-500/95 border-red-400 text-white shadow-red-500/30'}`}>
@@ -406,17 +406,17 @@ export default function App() {
                     ✨ Tidak ada jadwal Extra Besok Pagi
                   </div>
                 )}
-                
+
                 <div className="mt-6 pt-6 border-t border-orange-100/50 relative z-10">
-                   <button
-                     onClick={handleAcakJadwalExtra}
-                     className="w-full py-3 bg-white hover:bg-orange-50 border-2 border-dashed border-orange-200 text-orange-600 font-bold text-[14px] rounded-xl transition-all flex justify-center items-center gap-2"
-                   >
-                     <FiRefreshCw /> Acak Ulang Jadwal
-                   </button>
-                   <p className="text-[11px] text-center text-orange-400 mt-2">
-                     Mengacak ulang akan membagikan 12 bapak ke 6 hari secara acak.
-                   </p>
+                  <button
+                    onClick={handleAcakJadwalExtra}
+                    className="w-full py-3 bg-white hover:bg-orange-50 border-2 border-dashed border-orange-200 text-orange-600 font-bold text-[14px] rounded-xl transition-all flex justify-center items-center gap-2"
+                  >
+                    <FiRefreshCw /> Acak Ulang Jadwal
+                  </button>
+                  <p className="text-[11px] text-center text-orange-400 mt-2">
+                    Mengacak ulang akan membagikan 12 bapak ke 6 hari secara acak.
+                  </p>
                 </div>
               </section>
 
@@ -468,7 +468,7 @@ export default function App() {
                 <h2 className="text-xs font-black text-center text-emerald-500 tracking-[0.2em] mb-4 uppercase flex items-center justify-center gap-2 relative z-10">
                   <FiBookOpen className="text-sm" /> Opsi HMQ
                 </h2>
-                
+
                 <div className="space-y-3 h-80 overflow-y-auto pr-2 custom-scrollbar relative z-10">
                   <label className="flex items-center gap-4 cursor-pointer bg-emerald-600/5 px-5 py-3 rounded-2xl hover:bg-emerald-600/10 transition-colors sticky top-0 backdrop-blur-xl z-20">
                     <div className="relative flex items-center">
@@ -550,7 +550,7 @@ export default function App() {
                 <h2 className="text-xs font-black text-center text-sky-500 tracking-[0.2em] mb-4 uppercase flex items-center justify-center gap-2 relative z-10">
                   <FiBookOpen className="text-sm" /> Opsi AL-BAQOROH
                 </h2>
-                
+
                 <div className="space-y-3 h-80 overflow-y-auto pr-2 custom-scrollbar relative z-10">
                   <label className="flex items-center gap-4 cursor-pointer bg-sky-600/5 px-5 py-3 rounded-2xl hover:bg-sky-600/10 transition-colors sticky top-0 backdrop-blur-xl z-20">
                     <div className="relative flex items-center">
