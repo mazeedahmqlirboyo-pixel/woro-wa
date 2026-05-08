@@ -6,12 +6,12 @@ const TARGET_PHONE = '628889583421';
 
 // Mapping: new Date().getDay() menghasilkan index 0 (Minggu) sampai 6 (Sabtu)
 const JADWAL = {
-  0: { label: "Malam Senin", petugas: ["Bpk. Choerul Anam", "Bpk. Muhammad Burhanuddin Ramadhan"] },
+  0: { label: "Malam Senin", petugas: ["Bpk. Agus Wahyudin", "Bpk. Muhammad Burhanuddin Ramadhan"] },
   1: { label: "Malam Selasa", petugas: ["Bpk. Abdul Wakhid", "Bpk. Ahmad Syarief Qornel"] },
   2: { label: "Malam Rabu", petugas: ["Bpk. Muchammad Haqqinnazili", "Bpk. Adin Muhamad Mufid"] },
   3: { label: "Malam Kamis", petugas: ["Bpk. Muhammad Ricky Gunawan Pratama", "Bpk. Mohamad Khasan Bisri"] },
   4: { label: "Malam Jumat", petugas: [] }, // Tidak ada jadwal
-  5: { label: "Malam Sabtu", petugas: ["Bpk. Abdillah Khoironi", "Bpk. Agus Wahyudin"] },
+  5: { label: "Malam Sabtu", petugas: ["Bpk. Abdillah Khoironi", "Bpk. Choerul Anam"] },
   6: { label: "Malam Minggu", petugas: ["Bpk. M Khoirul Anwar", "Bpk. Muhammad Hadi Mafatih"] }
 };
 
