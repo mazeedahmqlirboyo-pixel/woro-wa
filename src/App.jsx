@@ -155,7 +155,7 @@ export default function App() {
     selectedPetugasExtra.forEach(name => {
       generated += `@${name}\n`;
     });
-    generated += `\n*Mohon untuk datang tepat waktu untuk kegiatan Extra Besok Pagi jam 08:00 - 09:00 WIS.*\n\nTerima kasih ${pray}`;
+    generated += `\n*Mohon untuk datang tepat waktu untuk kegiatan Extra Besok Pagi jam 07:45 (Mulai Menemani Lalaran) - 09:00 WIS. (Selesai)*\n\nTerima kasih ${pray}`;
     setMessageExtra(generated);
   };
 
