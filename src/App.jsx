@@ -284,7 +284,7 @@ export default function App() {
     selectedAlbaqoroh.forEach(name => {
       generated += `@${name}\n`;
     });
-    generated += `\n*Informasi untuk Bapak-bapak sekalian, hari ini ada kegiatan Sorogan di AL-BAQOROH. Mohon kehadirannya.*\n\n*Dan untuk Bapak-bapak yang lain senantiasa menjaga Musylail Di HMQ.*\n\nTerima kasih ${pray}`;
+    generated += `\n*Informasi untuk Bapak-bapak sekalian, hari ini ada kegiatan Sorogan di AL-BAQOROH yang dimulai pukul 20:15 - 21:45 WIS. Mohon kehadirannya.*\n\n*Dan untuk Bapak-bapak yang lain senantiasa menjaga Musylail Di HMQ.*\n\nTerima kasih ${pray}`;
     setMessageAlbaqoroh(generated);
   };
 
