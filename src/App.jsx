@@ -4,15 +4,45 @@ import { FaWhatsapp } from 'react-icons/fa';
 
 const TARGET_PHONE = '628889583421';
 
-// Mapping: new Date().getDay() menghasilkan index 0 (Minggu) sampai 6 (Sabtu)
-const JADWAL = {
-  0: { label: "Malam Senin", petugas: ["Bpk. Agus Wahyudin", "Bpk. Muhammad Burhanuddin Ramadhan"] },
-  1: { label: "Malam Selasa", petugas: ["Bpk. Abdul Wakhid", "Bpk. Ahmad Syarief Qornel"] },
-  2: { label: "Malam Rabu", petugas: ["Bpk. Muchammad Haqqinnazili", "Bpk. Adin Muhamad Mufid"] },
-  3: { label: "Malam Kamis", petugas: ["Bpk. Muhammad Ricky Gunawan Pratama", "Bpk. Mohamad Khasan Bisri"] },
-  4: { label: "Malam Jumat", petugas: [] }, // Tidak ada jadwal
-  5: { label: "Malam Sabtu", petugas: ["Bpk. Abdillah Khoironi", "Bpk. Choerul Anam"] },
-  6: { label: "Malam Minggu", petugas: ["Bpk. M Khoirul Anwar", "Bpk. Muhammad Hadi Mafatih"] }
+// Data Shift Musylail (6 Shift dari 4 Grup yang tidak boleh bentrok)
+const SHIFT_MUSYLAIL = [
+  ["Bpk. Abdillah Khoironi", "Bpk. Adin Muhamad Mufid"],
+  ["Bpk. Mohamad Khasan Bisri", "Bpk. Muhammad Ricky Gunawan Pratama"],
+  ["Bpk. M Khoirul Anwar", "Bpk. Muhammad Hadi Mafatih"],
+  ["Bpk. Agus Wahyudin", "Bpk. Muchammad Haqqinnazili"],
+  ["Bpk. Abdul Wakhid", "Bpk. Ahmad Syarief Qornel"],
+  ["Bpk. Muhammad Burhanuddin Ramadhan", "Bpk. Choerul Anam"]
+];
+
+const LABEL_MALAM = {
+  0: "Malam Senin",
+  1: "Malam Selasa",
+  2: "Malam Rabu",
+  3: "Malam Kamis",
+  4: "Malam Jumat", // Tidak terpakai
+  5: "Malam Sabtu", // Tidak terpakai
+  6: "Malam Minggu"
+};
+
+// Fungsi menghitung giliran shift (0 s/d 5) berdasarkan hari efektif berlalu
+const getMusylailShiftIndex = (targetDate) => {
+  const start = new Date(2024, 0, 1); // Acuan: 1 Jan 2024
+  const target = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+  
+  const diffTime = target - start;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  
+  let activeDays = 0;
+  let curr = new Date(start);
+  for (let i = 0; i <= diffDays; i++) {
+    const day = curr.getDay();
+    if (day !== 4 && day !== 5) { // Abaikan Malam Jumat & Malam Sabtu
+      activeDays++;
+    }
+    curr.setDate(curr.getDate() + 1);
+  }
+  
+  return (activeDays - 1) % 6;
 };
 
 // Daftar Semua Bapak untuk Opsi Sorogan
@@ -40,6 +70,42 @@ const GREETINGS = [
   "Sugeng ndalu Bapak-bapak:"
 ];
 
+// TIM HMQ
+const TIM_HMQ_1 = [
+  "Bpk. Abdillah Khoironi",
+  "Bpk. Adin Muhamad Mufid",
+  "Bpk. Mohamad Khasan Bisri",
+  "Bpk. Muhammad Ricky Gunawan Pratama",
+  "Bpk. Muhammad Hadi Mafatih",
+  "Bpk. Agus Wahyudin"
+];
+
+const TIM_HMQ_2 = [
+  "Bpk. M Khoirul Anwar",
+  "Bpk. Abdul Wakhid",
+  "Bpk. Muhammad Burhanuddin Ramadhan",
+  "Bpk. Choerul Anam",
+  "Bpk. Muchammad Haqqinnazili",
+  "Bpk. Ahmad Syarief Qornel"
+];
+
+// Fungsi menghitung tim HMQ aktif berdasarkan minggu
+const getActiveHmqTeam = () => {
+  const start = new Date(2026, 4, 18); // 18 Mei 2026 (Senin)
+  start.setHours(0,0,0,0);
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  
+  const diffTime = today - start;
+  const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
+  
+  if (diffWeeks < 0) return { label: "TIM 1", anggota: TIM_HMQ_1 };
+  
+  return diffWeeks % 2 === 0 
+    ? { label: "TIM 1", anggota: TIM_HMQ_1 }
+    : { label: "TIM 2", anggota: TIM_HMQ_2 };
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('musylail');
 
@@ -57,6 +123,7 @@ export default function App() {
   const [messageMusylail, setMessageMusylail] = useState('');
 
   // STATE: SOROGAN HMQ
+  const [timAktifHmqLabel, setTimAktifHmqLabel] = useState('');
   const [selectedHmq, setSelectedHmq] = useState([]);
   const [messageHmq, setMessageHmq] = useState('');
 
@@ -98,16 +165,29 @@ export default function App() {
     const today = new Date();
     const dayIndex = today.getDay(); // 0 is Sunday, ..., 6 is Saturday
 
-    const jadwalMalam = JADWAL[dayIndex];
-    setMalamIni(jadwalMalam.label);
-    setPetugasMalamIni(jadwalMalam.petugas);
-    setSelectedPetugas(jadwalMalam.petugas); // Select all by default
+    setMalamIni(LABEL_MALAM[dayIndex]);
+    
+    // Malam Jumat (4) dan Malam Sabtu (5) tidak ada jadwal
+    if (dayIndex === 4 || dayIndex === 5) {
+      setPetugasMalamIni([]);
+      setSelectedPetugas([]);
+    } else {
+      const shiftIndex = getMusylailShiftIndex(today);
+      const petugasHariIni = SHIFT_MUSYLAIL[shiftIndex];
+      setPetugasMalamIni(petugasHariIni);
+      setSelectedPetugas(petugasHariIni); // Select all by default
+    }
 
     const tomorrowIndex = (dayIndex + 1) % 7;
     const jadwalPagi = jadwalExtraFull[tomorrowIndex];
     setPagiIni(jadwalPagi.label);
     setPetugasPagiIni(jadwalPagi.petugas);
     setSelectedPetugasExtra(jadwalPagi.petugas);
+
+    // HMQ
+    const hmqTeam = getActiveHmqTeam();
+    setTimAktifHmqLabel(hmqTeam.label);
+    setSelectedHmq(hmqTeam.anggota);
   }, [jadwalExtraFull]);
 
   const getRandomGreeting = () => GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
@@ -470,17 +550,21 @@ export default function App() {
                 </h2>
 
                 <div className="space-y-3 h-80 overflow-y-auto pr-2 custom-scrollbar relative z-10">
+                  <div className="bg-emerald-100/50 p-4 rounded-2xl border border-emerald-200 mb-4 text-center">
+                    <p className="text-emerald-800 font-bold text-sm mb-1">Minggu ini giliran:</p>
+                    <p className="text-emerald-900 font-black text-2xl">{timAktifHmqLabel}</p>
+                  </div>
                   <label className="flex items-center gap-4 cursor-pointer bg-emerald-600/5 px-5 py-3 rounded-2xl hover:bg-emerald-600/10 transition-colors sticky top-0 backdrop-blur-xl z-20">
                     <div className="relative flex items-center">
                       <input
                         type="checkbox"
-                        checked={selectedHmq.length === SEMUA_BAPAK.length}
-                        onChange={(e) => setSelectedHmq(e.target.checked ? SEMUA_BAPAK : [])}
+                        checked={selectedHmq.length === getActiveHmqTeam().anggota.length && getActiveHmqTeam().anggota.every(a => selectedHmq.includes(a))}
+                        onChange={(e) => setSelectedHmq(e.target.checked ? getActiveHmqTeam().anggota : [])}
                         className="peer w-6 h-6 appearance-none rounded-lg border-2 border-emerald-200 checked:bg-emerald-600 checked:border-emerald-600 transition-all cursor-pointer"
                       />
                       <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                     </div>
-                    <span className="font-extrabold text-[15px] text-emerald-900">Pilih Semua Bapak</span>
+                    <span className="font-extrabold text-[15px] text-emerald-900">Pilih Anggota {timAktifHmqLabel} (Otomatis)</span>
                   </label>
                   {SEMUA_BAPAK.map((petugas, idx) => (
                     <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-emerald-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-emerald-200 transition-all">
