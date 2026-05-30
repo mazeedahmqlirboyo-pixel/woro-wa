@@ -91,7 +91,7 @@ const TIM_ALBAQOROH_2 = [
 
 // Fungsi menghitung tim Al-Baqoroh aktif berdasarkan minggu
 const getActiveAlbaqorohTeam = () => {
-  const start = new Date(2026, 4, 18); // 18 Mei 2026 (Senin)
+  const start = new Date(2026, 4, 25); // 25 Mei 2026 (Senin)
   start.setHours(0,0,0,0);
   const today = new Date();
   today.setHours(0,0,0,0);
