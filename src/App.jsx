@@ -106,8 +106,137 @@ const getActiveAlbaqorohTeam = () => {
     : { label: "TIM 2", anggota: TIM_ALBAQOROH_2 };
 };
 
+const INDO_DAYS = ["Ahad", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+const INDO_MONTHS = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+];
+
+const formatDateIndo = (date) => {
+  if (!date) return "";
+  const dayName = INDO_DAYS[date.getDay()];
+  const day = date.getDate();
+  const monthName = INDO_MONTHS[date.getMonth()];
+  const year = date.getFullYear();
+  return `${dayName}, ${day} ${monthName} ${year}`;
+};
+
+const isToday = (date) => {
+  if (!date) return false;
+  const today = new Date();
+  return date.getDate() === today.getDate() &&
+         date.getMonth() === today.getMonth() &&
+         date.getFullYear() === today.getFullYear();
+};
+
+const isTomorrow = (date) => {
+  if (!date) return false;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return date.getDate() === tomorrow.getDate() &&
+         date.getMonth() === tomorrow.getMonth() &&
+         date.getFullYear() === tomorrow.getFullYear();
+};
+
+const getUpcomingMusylailDays = (startDate, count = 7) => {
+  const days = [];
+  for (let i = 0; i < count; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    const dayIndex = d.getDay();
+    const isOff = dayIndex === 4 || dayIndex === 5;
+    let petugas = [];
+    if (!isOff) {
+      const shiftIndex = getMusylailShiftIndex(d);
+      petugas = SHIFT_MUSYLAIL[shiftIndex];
+    }
+    days.push({
+      date: d,
+      dayIndex,
+      label: LABEL_MALAM[dayIndex],
+      petugas,
+      isOff
+    });
+  }
+  return days;
+};
+
+const getUpcomingExtraDays = (startDate, jadwalExtra, count = 7) => {
+  const days = [];
+  for (let i = 0; i < count; i++) {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    const dayIndex = d.getDay();
+    const jadwalPagi = jadwalExtra[dayIndex];
+    const isOff = dayIndex === 5; // Jumat Pagi libur
+    days.push({
+      date: d,
+      dayIndex,
+      label: jadwalPagi?.label || `${INDO_DAYS[dayIndex]} Pagi`,
+      petugas: jadwalPagi?.petugas || [],
+      isOff
+    });
+  }
+  return days;
+};
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('musylail');
+
+  const [selectedDateMusylail, setSelectedDateMusylail] = useState(() => new Date());
+  const [selectedDateExtra, setSelectedDateExtra] = useState(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow;
+  });
+
+  // STATE: PWA INSTALL PROMPT
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isIOSDevice, setIsIOSDevice] = useState(false);
+
+  useEffect(() => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    setIsIOSDevice(isIOS);
+
+    const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    const dismissed = localStorage.getItem('woroInstallDismissed') === 'true';
+
+    if (!isStandalone && !dismissed) {
+      if (isIOS) {
+        setShowInstallBanner(true);
+      }
+    }
+
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      if (!isStandalone && !dismissed) {
+        setShowInstallBanner(true);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setShowInstallBanner(false);
+    }
+  };
+
+  const handleDismissBanner = () => {
+    setShowInstallBanner(false);
+    localStorage.setItem('woroInstallDismissed', 'true');
+  };
 
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
@@ -162,9 +291,7 @@ export default function App() {
 
   // 4 & 8. Auto Detect Hari -> Konversi "Malam Selanjutnya"
   useEffect(() => {
-    const today = new Date();
-    const dayIndex = today.getDay(); // 0 is Sunday, ..., 6 is Saturday
-
+    const dayIndex = selectedDateMusylail.getDay();
     setMalamIni(LABEL_MALAM[dayIndex]);
     
     // Malam Jumat (4) dan Malam Sabtu (5) tidak ada jadwal
@@ -172,23 +299,29 @@ export default function App() {
       setPetugasMalamIni([]);
       setSelectedPetugas([]);
     } else {
-      const shiftIndex = getMusylailShiftIndex(today);
+      const shiftIndex = getMusylailShiftIndex(selectedDateMusylail);
       const petugasHariIni = SHIFT_MUSYLAIL[shiftIndex];
       setPetugasMalamIni(petugasHariIni);
       setSelectedPetugas(petugasHariIni); // Select all by default
     }
+    setMessageMusylail('');
+  }, [selectedDateMusylail]);
 
-    const tomorrowIndex = (dayIndex + 1) % 7;
-    const jadwalPagi = jadwalExtraFull[tomorrowIndex];
+  useEffect(() => {
+    const dayIndex = selectedDateExtra.getDay();
+    const jadwalPagi = jadwalExtraFull[dayIndex];
     setPagiIni(jadwalPagi.label);
     setPetugasPagiIni(jadwalPagi.petugas);
     setSelectedPetugasExtra(jadwalPagi.petugas);
+    setMessageExtra('');
+  }, [selectedDateExtra, jadwalExtraFull]);
 
+  useEffect(() => {
     // AL-BAQOROH
     const albaqorohTeam = getActiveAlbaqorohTeam();
     setTimAktifAlbaqorohLabel(albaqorohTeam.label);
     setSelectedAlbaqoroh(albaqorohTeam.anggota);
-  }, [jadwalExtraFull]);
+  }, []);
 
   const getRandomGreeting = () => GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
   const pray = String.fromCodePoint(0x1F64F);
@@ -223,7 +356,7 @@ export default function App() {
 
   const handleGenerateExtra = () => {
     if (petugasPagiIni.length === 0) {
-      setMessageExtra(`Tidak ada jadwal Extra Besok Pagi.`);
+      setMessageExtra(`Tidak ada jadwal Extra Pagi.`);
       return;
     }
     if (selectedPetugasExtra.length === 0) {
@@ -231,18 +364,21 @@ export default function App() {
       return;
     }
 
+    const selectedPagiLabel = pagiIni; // e.g. "Senin Pagi"
+    const selectedDateStr = formatDateIndo(selectedDateExtra);
+
     let generated = `*INFO EXTRA*\n\n${getRandomGreeting()}\n\n`;
     selectedPetugasExtra.forEach(name => {
       generated += `@${name}\n`;
     });
-    generated += `\n*Mohon untuk datang tepat waktu untuk kegiatan Extra Besok Pagi jam 07:45 (Mulai Menemani Lalaran) - 09:00 WIS. (Selesai)*\n\nTerima kasih ${pray}`;
+    generated += `\n*Mohon untuk datang tepat waktu untuk kegiatan Extra Pagi (${selectedPagiLabel}, ${selectedDateStr}) jam 07:45 (Mulai Menemani Lalaran) - 09:00 WIS. (Selesai)*\n\nTerima kasih ${pray}`;
     setMessageExtra(generated);
   };
 
   // === HANDLER MUSYLAIL ===
   const handleGenerateMusylail = () => {
     if (petugasMalamIni.length === 0) {
-      setMessageMusylail(`Tidak ada jadwal jaga malam hari ini.`);
+      setMessageMusylail(`Tidak ada jadwal jaga malam.`);
       return;
     }
     if (selectedPetugas.length === 0) {
@@ -250,7 +386,10 @@ export default function App() {
       return;
     }
 
-    let generated = `*INFO JAGA MUSYLAIL AL-BAQOROH*\n\n${getRandomGreeting()}\n\n`;
+    const selectedMalamLabel = malamIni; // e.g. "Malam Senin"
+    const selectedDateStr = formatDateIndo(selectedDateMusylail);
+
+    let generated = `*INFO JAGA MUSYLAIL AL-BAQOROH (${selectedMalamLabel} - ${selectedDateStr})*\n\n${getRandomGreeting()}\n\n`;
     selectedPetugas.forEach(name => {
       generated += `@${name}\n`;
     });
@@ -327,10 +466,69 @@ export default function App() {
         </div>
       </div>
 
+      {/* PWA INSTALL BANNER */}
+      {showInstallBanner && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[90] animate-in fade-in slide-in-from-bottom-5 duration-500">
+          <div className="bg-white/95 backdrop-blur-md border border-indigo-100 p-5 rounded-[2rem] shadow-2xl flex flex-col gap-4">
+            <div className="flex gap-4 items-start">
+              <img src="/logo.png" alt="Logo WORO" className="w-14 h-14 rounded-2xl shadow-md border border-gray-105 object-cover" />
+              <div className="flex-1">
+                <h3 className="font-extrabold text-[15px] text-gray-950 leading-tight">Pasang Aplikasi WORO MZD</h3>
+                <p className="text-[12px] text-gray-500 mt-1 leading-normal">
+                  {isIOSDevice 
+                    ? "Pasang aplikasi ini di HP Anda untuk akses lebih cepat dan mudah langsung dari layar utama."
+                    : "Tambahkan aplikasi ke layar utama HP Anda untuk kemudahan akses piket sehari-hari."
+                  }
+                </p>
+              </div>
+            </div>
+
+            {isIOSDevice ? (
+              <div className="bg-indigo-50/50 rounded-2xl p-3.5 border border-indigo-100/50 text-[12px] text-indigo-950 font-medium space-y-2">
+                <p className="font-bold text-indigo-900">Instruksi Safari iOS:</p>
+                <div className="flex gap-2 items-center">
+                  <span className="bg-indigo-600 text-white font-extrabold w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0">1</span>
+                  <span>Ketuk tombol **Bagikan (Share)** (ikon kotak dengan panah atas [↑] di bar bawah browser Safari).</span>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <span className="bg-indigo-600 text-white font-extrabold w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0">2</span>
+                  <span>Pilih **Tambahkan ke Layar Utama (Add to Home Screen)**.</span>
+                </div>
+              </div>
+            ) : null}
+
+            <div className="flex gap-3 mt-1">
+              <button 
+                onClick={handleDismissBanner}
+                className="flex-1 py-3 text-xs font-bold bg-gray-100 text-gray-600 hover:bg-gray-200 rounded-xl transition-colors"
+              >
+                Nanti Saja
+              </button>
+              {!isIOSDevice && deferredPrompt && (
+                <button 
+                  onClick={handleInstallClick}
+                  className="flex-1 py-3 text-xs font-extrabold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]"
+                >
+                  Pasang Sekarang
+                </button>
+              )}
+              {isIOSDevice && (
+                <button 
+                  onClick={handleDismissBanner}
+                  className="flex-1 py-3 text-xs font-extrabold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]"
+                >
+                  Mengerti
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl min-h-screen shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative pb-6 sm:my-10 sm:min-h-0 sm:rounded-[2.5rem] border border-white overflow-hidden transition-all duration-500">
 
         {/* Header - Sticky */}
-        <header className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-white/50">
+        <header id="header" className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-white/50">
           <div className="flex items-center gap-4 px-6 pt-6 pb-5">
             <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-3 rounded-2xl shadow-lg shadow-indigo-200">
               <FiCalendar className="text-2xl text-white" />
@@ -358,8 +556,50 @@ export default function App() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
               <section className="bg-gradient-to-br from-indigo-50 to-white border border-indigo-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <h2 className="text-xs font-black text-center text-indigo-400 tracking-[0.2em] mb-2 uppercase relative z-10">Piket Hari Ini</h2>
-                <div className="text-4xl font-black text-center text-indigo-900 mb-6 tracking-tight relative z-10">{malamIni}</div>
+                <h2 className="text-xs font-black text-center text-indigo-400 tracking-[0.2em] mb-3 uppercase relative z-10">Piket Malam Musylail</h2>
+                
+                {/* Navigasi Tanggal */}
+                <div className="flex items-center justify-between gap-2 mb-4 bg-indigo-950/5 p-2 rounded-2xl relative z-10">
+                  <button
+                    onClick={() => {
+                      const prev = new Date(selectedDateMusylail);
+                      prev.setDate(prev.getDate() - 1);
+                      setSelectedDateMusylail(prev);
+                    }}
+                    className="p-2 bg-white hover:bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
+                    title="Sebelumnya"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+                  </button>
+
+                  <div className="text-center flex-1">
+                    <div className="text-xs font-extrabold text-indigo-500 uppercase tracking-wider">{malamIni || 'Tidak Ada Piket'}</div>
+                    <div className="text-[14px] font-black text-indigo-950 mt-0.5">{formatDateIndo(selectedDateMusylail)}</div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const next = new Date(selectedDateMusylail);
+                      next.setDate(next.getDate() + 1);
+                      setSelectedDateMusylail(next);
+                    }}
+                    className="p-2 bg-white hover:bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
+                    title="Berikutnya"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
+                  </button>
+                </div>
+
+                {!isToday(selectedDateMusylail) && (
+                  <div className="flex justify-center mb-4 relative z-10 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <button
+                      onClick={() => setSelectedDateMusylail(new Date())}
+                      className="px-3 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-md shadow-indigo-200 active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      <FiRefreshCw className="text-[10px]" /> Kembali ke Hari Ini
+                    </button>
+                  </div>
+                )}
 
                 {petugasMalamIni.length > 0 ? (
                   <div className="space-y-3 relative z-10">
@@ -394,7 +634,7 @@ export default function App() {
                     ))}
                   </div>
                 ) : (
-                  <div className="bg-white/80 backdrop-blur-sm px-6 py-5 rounded-2xl font-bold text-indigo-400 border border-indigo-100/50 text-center shadow-sm">
+                  <div className="bg-white/80 backdrop-blur-sm px-6 py-5 rounded-2xl font-bold text-indigo-400 border border-indigo-100/50 text-center shadow-sm relative z-10">
                     ✨ Tidak ada jadwal piket malam ini
                   </div>
                 )}
@@ -438,6 +678,62 @@ export default function App() {
                   Salin Teks Pesan
                 </button>
               </section>
+
+              {/* Jadwal Terstruktur */}
+              <section className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm space-y-4 animate-in">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                  <h3 className="text-sm font-black text-gray-800 flex items-center gap-2">
+                    <FiCalendar className="text-indigo-600" />
+                    Jadwal Terstruktur (7 Hari ke Depan)
+                  </h3>
+                </div>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                  {getUpcomingMusylailDays(new Date()).map((day, idx) => {
+                    const isSelected = selectedDateMusylail.getDate() === day.date.getDate() &&
+                                       selectedDateMusylail.getMonth() === day.date.getMonth() &&
+                                       selectedDateMusylail.getFullYear() === day.date.getFullYear();
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setSelectedDateMusylail(day.date);
+                          document.getElementById('header')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className={`w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all text-left ${
+                          isSelected
+                            ? 'bg-indigo-50/70 border-indigo-200 shadow-sm scale-[0.99]'
+                            : 'bg-white hover:bg-gray-50 border-gray-100'
+                        }`}
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <span className={`text-[10px] font-bold ${isSelected ? 'text-indigo-600' : 'text-gray-400'}`}>
+                            {formatDateIndo(day.date).split(',')[0]}, {day.date.getDate()} {INDO_MONTHS[day.date.getMonth()]}
+                          </span>
+                          <span className="text-[14px] font-black text-gray-805">
+                            {day.label}
+                          </span>
+                        </div>
+                        
+                        <div className="flex flex-col items-end gap-1">
+                          {day.isOff ? (
+                            <span className="px-2 py-0.5 text-[10px] font-bold bg-gray-100 text-gray-400 rounded-full uppercase tracking-wider">
+                              Libur
+                            </span>
+                          ) : (
+                            <div className="flex flex-col gap-0.5 items-end">
+                              {day.petugas.map((p, pIdx) => (
+                                <span key={pIdx} className="text-xs font-bold text-indigo-950">
+                                  {p}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
             </div>
           )}
 
@@ -446,8 +742,54 @@ export default function App() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
               <section className="bg-gradient-to-br from-orange-50 to-white border border-orange-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <h2 className="text-xs font-black text-center text-orange-400 tracking-[0.2em] mb-2 uppercase relative z-10">Piket Extra Besok</h2>
-                <div className="text-4xl font-black text-center text-orange-900 mb-6 tracking-tight relative z-10">{pagiIni}</div>
+                <h2 className="text-xs font-black text-center text-orange-400 tracking-[0.2em] mb-3 uppercase relative z-10">Piket Extra Pagi</h2>
+                
+                {/* Navigasi Tanggal */}
+                <div className="flex items-center justify-between gap-2 mb-4 bg-orange-950/5 p-2 rounded-2xl relative z-10">
+                  <button
+                    onClick={() => {
+                      const prev = new Date(selectedDateExtra);
+                      prev.setDate(prev.getDate() - 1);
+                      setSelectedDateExtra(prev);
+                    }}
+                    className="p-2 bg-white hover:bg-orange-50 border border-orange-100 text-orange-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
+                    title="Sebelumnya"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
+                  </button>
+
+                  <div className="text-center flex-1">
+                    <div className="text-xs font-extrabold text-orange-500 uppercase tracking-wider">{pagiIni || 'Tidak Ada Piket'}</div>
+                    <div className="text-[14px] font-black text-orange-950 mt-0.5">{formatDateIndo(selectedDateExtra)}</div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      const next = new Date(selectedDateExtra);
+                      next.setDate(next.getDate() + 1);
+                      setSelectedDateExtra(next);
+                    }}
+                    className="p-2 bg-white hover:bg-orange-50 border border-orange-100 text-orange-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
+                    title="Berikutnya"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
+                  </button>
+                </div>
+
+                {!isTomorrow(selectedDateExtra) && (
+                  <div className="flex justify-center mb-4 relative z-10 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <button
+                      onClick={() => {
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        setSelectedDateExtra(tomorrow);
+                      }}
+                      className="px-3 py-1.5 text-xs font-bold bg-orange-600 hover:bg-orange-500 text-white rounded-full shadow-md shadow-orange-200 active:scale-95 transition-all flex items-center gap-1.5"
+                    >
+                      <FiRefreshCw className="text-[10px]" /> Kembali ke Besok Pagi
+                    </button>
+                  </div>
+                )}
 
                 {petugasPagiIni.length > 0 ? (
                   <div className="space-y-3 relative z-10">
@@ -473,7 +815,7 @@ export default function App() {
                               if (selectedPetugasExtra.includes(petugas)) setSelectedPetugasExtra(selectedPetugasExtra.filter(p => p !== petugas));
                               else setSelectedPetugasExtra([...selectedPetugasExtra, petugas]);
                             }}
-                            className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-orange-500 checked:border-orange-500 transition-all cursor-pointer"
+                            className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-orange-500 checked:border-orange-505 transition-all cursor-pointer"
                           />
                           <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                         </div>
@@ -483,7 +825,7 @@ export default function App() {
                   </div>
                 ) : (
                   <div className="bg-white/80 backdrop-blur-sm px-6 py-5 rounded-2xl font-bold text-orange-400 border border-orange-100/50 text-center shadow-sm relative z-10">
-                    ✨ Tidak ada jadwal Extra Besok Pagi
+                    ✨ Tidak ada jadwal Extra Pagi
                   </div>
                 )}
 
@@ -536,6 +878,62 @@ export default function App() {
                 >
                   <FiCopy className="text-xl" /> Salin Teks
                 </button>
+              </section>
+
+              {/* Jadwal Terstruktur */}
+              <section className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm space-y-4 animate-in">
+                <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                  <h3 className="text-sm font-black text-gray-850 flex items-center gap-2">
+                    <FiCalendar className="text-orange-600" />
+                    Jadwal Terstruktur (7 Hari ke Depan)
+                  </h3>
+                </div>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                  {getUpcomingExtraDays(new Date(), jadwalExtraFull).map((day, idx) => {
+                    const isSelected = selectedDateExtra.getDate() === day.date.getDate() &&
+                                       selectedDateExtra.getMonth() === day.date.getMonth() &&
+                                       selectedDateExtra.getFullYear() === day.date.getFullYear();
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setSelectedDateExtra(day.date);
+                          document.getElementById('header')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className={`w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all text-left ${
+                          isSelected
+                            ? 'bg-orange-50/70 border-orange-200 shadow-sm scale-[0.99]'
+                            : 'bg-white hover:bg-gray-50 border-gray-100'
+                        }`}
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <span className={`text-[10px] font-bold ${isSelected ? 'text-orange-600' : 'text-gray-400'}`}>
+                            {formatDateIndo(day.date).split(',')[0]}, {day.date.getDate()} {INDO_MONTHS[day.date.getMonth()]}
+                          </span>
+                          <span className="text-[14px] font-black text-gray-805">
+                            {day.label}
+                          </span>
+                        </div>
+                        
+                        <div className="flex flex-col items-end gap-1">
+                          {day.isOff ? (
+                            <span className="px-2 py-0.5 text-[10px] font-bold bg-gray-100 text-gray-400 rounded-full uppercase tracking-wider">
+                              Libur
+                            </span>
+                          ) : (
+                            <div className="flex flex-col gap-0.5 items-end">
+                              {day.petugas.map((p, pIdx) => (
+                                <span key={pIdx} className="text-xs font-bold text-orange-950">
+                                  {p}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </section>
             </div>
           )}
@@ -713,5 +1111,3 @@ export default function App() {
     </div>
   );
 }
-
-
