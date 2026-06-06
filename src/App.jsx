@@ -471,7 +471,7 @@ export default function App() {
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[90] animate-in fade-in slide-in-from-bottom-5 duration-500">
           <div className="bg-white/95 backdrop-blur-md border border-indigo-100 p-5 rounded-[2rem] shadow-2xl flex flex-col gap-4">
             <div className="flex gap-4 items-start">
-              <img src="/logo.png" alt="Logo WORO" className="w-14 h-14 rounded-2xl shadow-md border border-gray-105 object-cover" />
+              <img src="./logo.png" alt="Logo WORO" className="w-14 h-14 rounded-2xl shadow-md border border-gray-105 object-cover" />
               <div className="flex-1">
                 <h3 className="font-extrabold text-[15px] text-gray-950 leading-tight">Pasang Aplikasi WORO MAZEEDA</h3>
                 <p className="text-[12px] text-gray-500 mt-1 leading-normal">

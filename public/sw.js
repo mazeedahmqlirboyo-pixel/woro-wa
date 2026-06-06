@@ -1,9 +1,9 @@
 const CACHE_NAME = 'woro-mazeeda-v1';
 const assets = [
-  '/',
-  '/index.html',
-  '/logo.png',
-  '/manifest.json'
+  './',
+  'index.html',
+  'logo.png',
+  'manifest.json'
 ];
 
 self.addEventListener('install', e => {
