@@ -1,11 +1,11 @@
 {
-  "name": "WORO MZD",
-  "short_name": "WORO MZD",
+  "name": "WORO MAZEEDA",
+  "short_name": "WORO MAZEEDA",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4f46e5",
-  "description": "Aplikasi WORO MZD",
+  "description": "Aplikasi WORO MAZEEDA",
   "icons": [
     {
       "src": "/logo.png",

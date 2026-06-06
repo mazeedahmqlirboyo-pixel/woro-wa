@@ -473,7 +473,7 @@ export default function App() {
             <div className="flex gap-4 items-start">
               <img src="/logo.png" alt="Logo WORO" className="w-14 h-14 rounded-2xl shadow-md border border-gray-105 object-cover" />
               <div className="flex-1">
-                <h3 className="font-extrabold text-[15px] text-gray-950 leading-tight">Pasang Aplikasi WORO MZD</h3>
+                <h3 className="font-extrabold text-[15px] text-gray-950 leading-tight">Pasang Aplikasi WORO MAZEEDA</h3>
                 <p className="text-[12px] text-gray-500 mt-1 leading-normal">
                   {isIOSDevice 
                     ? "Pasang aplikasi ini di HP Anda untuk akses lebih cepat dan mudah langsung dari layar utama."

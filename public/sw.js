@@ -1,4 +1,4 @@
-const CACHE_NAME = 'woro-mzd-v1';
+const CACHE_NAME = 'woro-mazeeda-v1';
 const assets = [
   '/',
   '/index.html',
