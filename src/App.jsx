@@ -4,14 +4,14 @@ import { FaWhatsapp } from 'react-icons/fa';
 
 const TARGET_PHONE = '628889583421';
 
-// Data Shift Musylail (6 Shift dari 4 Grup yang tidak boleh bentrok)
+// Data Shift Musylail Baru (6 Shift yang diacak, grup tidak bentrok)
 const SHIFT_MUSYLAIL = [
-  ["Bpk. Abdillah Khoironi", "Bpk. Adin Muhamad Mufid"],
-  ["Bpk. Mohamad Khasan Bisri", "Bpk. Muhammad Ricky Gunawan Pratama"],
-  ["Bpk. M Khoirul Anwar", "Bpk. Muhammad Hadi Mafatih"],
-  ["Bpk. Agus Wahyudin", "Bpk. Muchammad Haqqinnazili"],
-  ["Bpk. Abdul Wakhid", "Bpk. Ahmad Syarief Qornel"],
-  ["Bpk. Muhammad Burhanuddin Ramadhan", "Bpk. Choerul Anam"]
+  ["Bpk. Abdillah Khoironi", "Bpk. Choerul Anam"],
+  ["Bpk. Muhammad Burhanuddin Ramadhan", "Bpk. Muhammad Ricky Gunawan Pratama"],
+  ["Bpk. M Khoirul Anwar", "Bpk. Muchammad Haqqinnazili"],
+  ["Bpk. Agus Wahyudin", "Bpk. Mohamad Khasan Bisri"],
+  ["Bpk. Abdul Wakhid", "Bpk. Adin Muhamad Mufid"],
+  ["Bpk. Muhammad Hadi Mafatih", "Bpk. Ahmad Syarief Qornel"]
 ];
 
 const LABEL_MALAM = {
@@ -19,30 +19,43 @@ const LABEL_MALAM = {
   1: "Malam Selasa",
   2: "Malam Rabu",
   3: "Malam Kamis",
-  4: "Malam Jumat", // Tidak terpakai
-  5: "Malam Sabtu", // Tidak terpakai
+  4: "Malam Jumat", // Tetap kosong
+  5: "Malam Sabtu", // Bisa nyala/mati
   6: "Malam Minggu"
 };
 
-// Fungsi menghitung giliran shift (0 s/d 5) berdasarkan hari efektif berlalu
-const getMusylailShiftIndex = (targetDate) => {
-  const start = new Date(2024, 0, 1); // Acuan: 1 Jan 2024
-  const target = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
+// Fungsi menghitung giliran shift berdasarkan memori sinkronisasi terakhir
+const getMusylailShiftIndexAtDate = (targetDate, isMalamSabtuActive) => {
+  const savedState = JSON.parse(localStorage.getItem('musylailStateV5')) || {
+    lastDateStr: new Date(Date.now() - 86400000).toISOString().split('T')[0], // default kemarin
+    shiftIndex: 0
+  };
   
-  const diffTime = target - start;
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const start = new Date(savedState.lastDateStr);
+  start.setHours(0,0,0,0);
   
-  let activeDays = 0;
-  let curr = new Date(start);
-  for (let i = 0; i <= diffDays; i++) {
-    const day = curr.getDay();
-    if (day !== 4 && day !== 5) { // Abaikan Malam Jumat & Malam Sabtu
-      activeDays++;
-    }
+  const target = new Date(targetDate);
+  target.setHours(0,0,0,0);
+  
+  let activeDaysPassed = 0;
+  
+  if (target > start) {
+    let curr = new Date(start);
     curr.setDate(curr.getDate() + 1);
+    while (curr <= target) {
+      const d = curr.getDay();
+      const isJumat = d === 4;
+      const isSabtu = d === 5;
+      if (!isJumat && (!isSabtu || isMalamSabtuActive)) {
+        activeDaysPassed++;
+      }
+      curr.setDate(curr.getDate() + 1);
+    }
+    return (savedState.shiftIndex + activeDaysPassed) % 6;
+  } else {
+    // Jika tanggal kurang dari sama dengan hari sinkronisasi, anggap shift-nya sama 
+    return savedState.shiftIndex;
   }
-  
-  return (activeDays - 1) % 6;
 };
 
 // Daftar Semua Bapak untuk Opsi Sorogan
@@ -138,16 +151,18 @@ const isTomorrow = (date) => {
          date.getFullYear() === tomorrow.getFullYear();
 };
 
-const getUpcomingMusylailDays = (startDate, count = 7) => {
+const getUpcomingMusylailDays = (startDate, isMalamSabtuActive, count = 7) => {
   const days = [];
   for (let i = 0; i < count; i++) {
     const d = new Date(startDate);
     d.setDate(startDate.getDate() + i);
     const dayIndex = d.getDay();
-    const isOff = dayIndex === 4 || dayIndex === 5;
+    const isJumat = dayIndex === 4;
+    const isSabtu = dayIndex === 5;
+    const isOff = isJumat || (isSabtu && !isMalamSabtuActive);
     let petugas = [];
     if (!isOff) {
-      const shiftIndex = getMusylailShiftIndex(d);
+      const shiftIndex = getMusylailShiftIndexAtDate(d, isMalamSabtuActive);
       petugas = SHIFT_MUSYLAIL[shiftIndex];
     }
     days.push({
@@ -251,6 +266,46 @@ export default function App() {
   const [selectedPetugas, setSelectedPetugas] = useState([]);
   const [messageMusylail, setMessageMusylail] = useState('');
 
+  const [isMalamSabtuActive, setIsMalamSabtuActive] = useState(() => {
+    return JSON.parse(localStorage.getItem('malamSabtuActive')) || false;
+  });
+
+  const handleToggleMalamSabtu = (checked) => {
+    setIsMalamSabtuActive(checked);
+    localStorage.setItem('malamSabtuActive', JSON.stringify(checked));
+  };
+
+  // Checkpoint: lock the history up to today so toggle changes don't affect the past
+  useEffect(() => {
+    const savedState = JSON.parse(localStorage.getItem('musylailStateV5')) || {
+      lastDateStr: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+      shiftIndex: 0
+    };
+    
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+    const start = new Date(savedState.lastDateStr);
+    start.setHours(0,0,0,0);
+    today.setHours(0,0,0,0);
+    
+    if (today > start) {
+      let activeDaysPassed = 0;
+      let curr = new Date(start);
+      curr.setDate(curr.getDate() + 1);
+      while (curr <= today) {
+        const d = curr.getDay();
+        if (d !== 4 && (d !== 5 || isMalamSabtuActive)) {
+          activeDaysPassed++;
+        }
+        curr.setDate(curr.getDate() + 1);
+      }
+      localStorage.setItem('musylailStateV5', JSON.stringify({
+         lastDateStr: todayStr,
+         shiftIndex: (savedState.shiftIndex + activeDaysPassed) % 6
+      }));
+    }
+  }, [isMalamSabtuActive]);
+
   // STATE: SOROGAN HMQ
   const [selectedHmq, setSelectedHmq] = useState([]);
   const [messageHmq, setMessageHmq] = useState('');
@@ -294,18 +349,20 @@ export default function App() {
     const dayIndex = selectedDateMusylail.getDay();
     setMalamIni(LABEL_MALAM[dayIndex]);
     
-    // Malam Jumat (4) dan Malam Sabtu (5) tidak ada jadwal
-    if (dayIndex === 4 || dayIndex === 5) {
+    const isJumat = dayIndex === 4;
+    const isSabtu = dayIndex === 5;
+    
+    if (isJumat || (isSabtu && !isMalamSabtuActive)) {
       setPetugasMalamIni([]);
       setSelectedPetugas([]);
     } else {
-      const shiftIndex = getMusylailShiftIndex(selectedDateMusylail);
+      const shiftIndex = getMusylailShiftIndexAtDate(selectedDateMusylail, isMalamSabtuActive);
       const petugasHariIni = SHIFT_MUSYLAIL[shiftIndex];
       setPetugasMalamIni(petugasHariIni);
       setSelectedPetugas(petugasHariIni); // Select all by default
     }
     setMessageMusylail('');
-  }, [selectedDateMusylail]);
+  }, [selectedDateMusylail, isMalamSabtuActive]);
 
   useEffect(() => {
     const dayIndex = selectedDateExtra.getDay();
@@ -686,9 +743,23 @@ export default function App() {
                     <FiCalendar className="text-indigo-600" />
                     Jadwal Terstruktur (7 Hari ke Depan)
                   </h3>
+                  
+                  {/* Toggle Malam Sabtu */}
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-xs font-bold text-gray-500">Aktifkan Malam Sabtu</span>
+                    <div className="relative inline-flex items-center">
+                      <input 
+                        type="checkbox" 
+                        checked={isMalamSabtuActive} 
+                        onChange={(e) => handleToggleMalamSabtu(e.target.checked)} 
+                        className="sr-only peer" 
+                      />
+                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-500"></div>
+                    </div>
+                  </label>
                 </div>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                  {getUpcomingMusylailDays(new Date()).map((day, idx) => {
+                  {getUpcomingMusylailDays(new Date(), isMalamSabtuActive).map((day, idx) => {
                     const isSelected = selectedDateMusylail.getDate() === day.date.getDate() &&
                                        selectedDateMusylail.getMonth() === day.date.getMonth() &&
                                        selectedDateMusylail.getFullYear() === day.date.getFullYear();
