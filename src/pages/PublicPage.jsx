@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy, FiInfo } from 'react-icons/fi';
+import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy, FiInfo, FiLock } from 'react-icons/fi';
 import logoWoro from '../assets/512.png.png';
 import { supabase } from '../supabaseClient';
 import { 
@@ -322,15 +322,8 @@ export default function PublicPage() {
   };
 
   return (
-    <div className="min-h-screen bg-blue-50 flex flex-col items-center pb-8 font-sans selection:bg-blue-200 selection:text-blue-900">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] bg-blue-50 flex flex-col items-center pb-8 font-sans selection:bg-blue-200 selection:text-blue-900">
       
-      {/* Admin Link at the very top */}
-      <div className="w-full max-w-md flex justify-end px-4 py-2 relative z-[60]">
-        <a href="/admin" className="text-xs bg-blue-600/10 hover:bg-blue-600/20 text-blue-700 px-3 py-1.5 rounded-full font-bold transition backdrop-blur-md border border-blue-200">
-          ⚙️ Panel Admin
-        </a>
-      </div>
-
       {/* TOAST NOTIFICATION */}
       <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 transform ${toast.show ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95 pointer-events-none'}`}>
         <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md ${toast.type === 'success' ? 'bg-blue-600/95 border-blue-500 text-white shadow-blue-500/30' : 'bg-red-500/95 border-red-400 text-white shadow-red-500/30'}`}>
@@ -403,12 +396,19 @@ export default function PublicPage() {
 
         {/* Header - Sticky */}
         <header id="header" className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-white/50">
-          <div className="flex items-center gap-4 px-6 pt-6 pb-5">
-            <img src={logoWoro} alt="Logo Mazeeda" className="w-14 h-14 rounded-2xl shadow-lg shadow-blue-200 object-cover border border-blue-50" />
-            <div>
-              <h1 className="text-xl font-black text-blue-800 leading-tight">MAZEEDA WORO-WORO</h1>
-              <p className="text-[10px] text-blue-500/80 font-bold tracking-[0.2em] uppercase mt-0.5">PENGUMUMAN & PIKET</p>
+          <div className="flex items-center justify-between px-6 pt-6 pb-5">
+            <div className="flex items-center gap-4">
+              <img src={logoWoro} alt="Logo Mazeeda" className="w-14 h-14 rounded-2xl shadow-lg shadow-blue-200 object-cover border border-blue-50" />
+              <div>
+                <h1 className="text-xl font-black text-blue-800 leading-tight">MAZEEDA WORO-WORO</h1>
+                <p className="text-[10px] text-blue-500/80 font-bold tracking-[0.2em] uppercase mt-0.5">PENGUMUMAN & PIKET</p>
+              </div>
             </div>
+            
+            {/* Disguised Admin Link */}
+            <a href="/admin" className="p-2 text-blue-800/5 hover:text-blue-800/30 transition-colors" title="Admin Panel">
+              <FiLock className="w-4 h-4" />
+            </a>
           </div>
 
           <div className="px-5 pb-3">
