@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy, FiInfo, FiLock } from 'react-icons/fi';
+import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy, FiInfo, FiLock, FiMoon, FiSun, FiBook, FiUsers } from 'react-icons/fi';
 import logoWoro from '../assets/512.png.png';
 import { supabase } from '../supabaseClient';
 import { 
@@ -273,15 +273,22 @@ export default function PublicPage() {
     });
   };
 
-  const renderTabButton = (id, label) => (
+  const renderTabButton = (id, label, IconComponent) => (
     <button
       onClick={() => setActiveTab(id)}
-      className={`px-2 py-3 font-bold text-[12px] sm:text-[13px] flex-1 whitespace-nowrap transition-all duration-300 rounded-[1rem] ${activeTab === id
-        ? 'bg-white text-blue-700 shadow-[0_2px_10px_rgb(0,0,0,0.06)]'
-        : 'text-gray-500 hover:text-blue-600 hover:bg-white/50'
-        }`}
+      className={`flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition-all duration-300 relative ${
+        activeTab === id ? 'text-blue-600' : 'text-gray-400 hover:text-blue-400'
+      }`}
     >
-      {label}
+      <div className={`relative transition-transform duration-300 ${activeTab === id ? '-translate-y-1 scale-110' : 'scale-100'}`}>
+        <IconComponent className="text-[22px]" />
+        {activeTab === id && (
+          <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-blue-600 rounded-full shadow-[0_0_8px_rgba(37,99,235,0.8)]"></span>
+        )}
+      </div>
+      <span className={`text-[9px] font-bold tracking-wide transition-all duration-300 ${activeTab === id ? 'opacity-100' : 'opacity-70'}`}>
+        {label}
+      </span>
     </button>
   );
 
@@ -322,7 +329,7 @@ export default function PublicPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] bg-blue-50 flex flex-col items-center pb-8 font-sans selection:bg-blue-200 selection:text-blue-900">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] bg-blue-50 flex flex-col items-center pb-28 font-sans selection:bg-blue-200 selection:text-blue-900">
       
       {/* TOAST NOTIFICATION */}
       <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 transform ${toast.show ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95 pointer-events-none'}`}>
@@ -411,14 +418,6 @@ export default function PublicPage() {
             </a>
           </div>
 
-          <div className="px-5 pb-3">
-            <div className="flex flex-wrap w-full bg-gray-100/80 p-1.5 rounded-[1.25rem] shadow-inner gap-1">
-              {renderTabButton('musylail', 'Musylail')}
-              {renderTabButton('extra', 'Extra Pagi')}
-              {renderTabButton('hmq', 'Sorogan HMQ')}
-              {renderTabButton('albaqoroh', 'S. Al-Baq')}
-            </div>
-          </div>
         </header>
 
         <div className="p-6 space-y-8">
@@ -893,6 +892,17 @@ export default function PublicPage() {
 
         </div>
       </div>
+
+      {/* iOS Instagram Style Bottom Navigation Bar */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-3rem)] max-w-md pointer-events-none">
+        <div className="flex justify-between items-center bg-white/75 backdrop-blur-2xl px-2 py-2.5 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/60 pointer-events-auto">
+          {renderTabButton('musylail', 'Musylail', FiMoon)}
+          {renderTabButton('extra', 'Extra Pagi', FiSun)}
+          {renderTabButton('hmq', 'Sorogan HMQ', FiBook)}
+          {renderTabButton('albaqoroh', 'S. Al-Baq', FiUsers)}
+        </div>
+      </div>
+
     </div>
   );
 }
