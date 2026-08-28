@@ -92,7 +92,6 @@ export const getMusylailGroups = (settings, targetDate) => {
   
   const daftarMustahiq = settings?.daftar_mustahiq || SEMUA_BAPAK;
   
-  // Fungsi Seeded Random (Biar hasil acakan tetap sama selama periode 2 minggu tersebut)
   const mulberry32 = (a) => {
     return function() {
       var t = a += 0x6D2B79F5;
@@ -112,15 +111,55 @@ export const getMusylailGroups = (settings, targetDate) => {
     return shuffled;
   };
 
-  // Acak daftar nama menggunakan periodsPassed sebagai seed
-  // Tambahkan angka acak (misal 54321) agar urutannya sangat berbeda dari urutan asli
-  const shuffledList = seededShuffle(daftarMustahiq, periodsPassed + 54321);
+  // Kategori sesuai request (A tidak boleh dengan A, B tidak dengan B, dll)
+  const KATEGORI_MUSTAHIQ = {
+    "Bpk. Abdillah Khoironi": "A",
+    "Bpk. M Khoirul Anwar": "A", 
+    "Bpk. Abdul Wakhid": "A",
+    "Bpk. Adin Muhamad Mufid": "B",
+    "Bpk. Agus Wahyudin": "B",
+    "Bpk. Muhammad Burhanuddin Ramadhan": "B",
+    "Bpk. Mohamad Khasan Bisri": "C",
+    "Bpk. Muhammad Hadi Mafatih": "C",
+    "Bpk. Choerul Anam": "C", 
+    "Bpk. Muhammad Ricky Gunawan Pratama": "D",
+    "Bpk. Muchammad Haqqinnazili": "D",
+    "Bpk. Ahmad Syarief Qornel": "D",
+  };
 
-  const dynamicGroups = [];
-  for (let i = 0; i < shuffledList.length; i += 2) {
-    const p1 = shuffledList[i];
-    const p2 = i + 1 < shuffledList.length ? shuffledList[i + 1] : "Kosong";
-    dynamicGroups.push([p1, p2]);
+  let validGroupsFound = false;
+  let attempt = 0;
+  let dynamicGroups = [];
+
+  // Looping untuk mencari acakan yang valid (tidak ada kategori yang sama dalam 1 grup)
+  while (!validGroupsFound && attempt < 100) {
+    const currentSeed = periodsPassed + 54321 + attempt;
+    const shuffledList = seededShuffle(daftarMustahiq, currentSeed);
+    
+    dynamicGroups = [];
+    let isValid = true;
+
+    for (let i = 0; i < shuffledList.length; i += 2) {
+      const p1 = shuffledList[i];
+      const p2 = i + 1 < shuffledList.length ? shuffledList[i + 1] : "Kosong";
+      
+      const kat1 = KATEGORI_MUSTAHIQ[p1] || p1; // Jika tidak ada di map, jadikan nama sbg kategori unik
+      const kat2 = KATEGORI_MUSTAHIQ[p2] || p2; 
+
+      // Jika p2 bukan "Kosong" dan kategorinya sama, maka acakan ini tidak sah
+      if (p2 !== "Kosong" && kat1 === kat2) {
+        isValid = false;
+        break;
+      }
+      
+      dynamicGroups.push([p1, p2]);
+    }
+
+    if (isValid) {
+      validGroupsFound = true;
+    } else {
+      attempt++;
+    }
   }
   
   return dynamicGroups;
