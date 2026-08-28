@@ -77,7 +77,7 @@ export const getMusylailGroups = (settings, targetDate) => {
     return settings.manual_groups;
   }
 
-  const anchorDate = new Date(2026, 4, 25);
+  const anchorDate = new Date(2026, 4, 11); // Digeser 2 minggu lebih awal agar rotasi (offset) berjalan hari ini
   anchorDate.setHours(0,0,0,0);
   
   const target = new Date(targetDate || new Date());
