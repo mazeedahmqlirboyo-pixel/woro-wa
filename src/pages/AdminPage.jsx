@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FiHome, FiSettings, FiCalendar, FiCheckSquare, FiInfo, FiTrash2, FiSave, FiUsers, FiRefreshCw } from 'react-icons/fi';
+import { FiHome, FiSettings, FiCalendar, FiCheckSquare, FiInfo, FiTrash2, FiSave, FiUsers, FiRefreshCw, FiChevronDown } from 'react-icons/fi';
 import { supabase } from '../supabaseClient';
 import { SEMUA_BAPAK, LABEL_MALAM, SHIFT_MUSYLAIL } from '../utils/constants';
 import { formatDateIndo, getMusylailGroups } from '../utils/helpers';
@@ -228,20 +228,26 @@ export default function AdminPage() {
                     <div key={gIdx} className="bg-blue-50/30 p-3 rounded-xl border border-blue-100">
                       <div className="text-[10px] font-black text-blue-700 uppercase mb-2">Kelompok {gIdx + 1}</div>
                       <div className="space-y-2">
-                        <select 
-                          className="w-full bg-white border border-gray-200 text-xs p-2 rounded-lg font-bold text-gray-700"
-                          value={group[0]}
-                          onChange={(e) => handleGroupChange(gIdx, 0, e.target.value)}
-                        >
-                          {SEMUA_BAPAK.map(b => <option key={b} value={b}>{b}</option>)}
-                        </select>
-                        <select 
-                          className="w-full bg-white border border-gray-200 text-xs p-2 rounded-lg font-bold text-gray-700"
-                          value={group[1]}
-                          onChange={(e) => handleGroupChange(gIdx, 1, e.target.value)}
-                        >
-                          {SEMUA_BAPAK.map(b => <option key={b} value={b}>{b}</option>)}
-                        </select>
+                        <div className="relative">
+                          <select 
+                            className="appearance-none w-full bg-white border border-blue-200 text-xs px-4 py-3 rounded-xl font-extrabold text-blue-900 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 transition-all cursor-pointer pr-10 hover:border-blue-300"
+                            value={group[0]}
+                            onChange={(e) => handleGroupChange(gIdx, 0, e.target.value)}
+                          >
+                            {SEMUA_BAPAK.map(b => <option key={b} value={b}>{b}</option>)}
+                          </select>
+                          <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none w-4 h-4" />
+                        </div>
+                        <div className="relative mt-2">
+                          <select 
+                            className="appearance-none w-full bg-white border border-blue-200 text-xs px-4 py-3 rounded-xl font-extrabold text-blue-900 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 transition-all cursor-pointer pr-10 hover:border-blue-300"
+                            value={group[1]}
+                            onChange={(e) => handleGroupChange(gIdx, 1, e.target.value)}
+                          >
+                            {SEMUA_BAPAK.map(b => <option key={b} value={b}>{b}</option>)}
+                          </select>
+                          <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none w-4 h-4" />
+                        </div>
                       </div>
                     </div>
                   ))}
