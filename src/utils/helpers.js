@@ -78,7 +78,7 @@ export const getMusylailShiftIndexAuto = (targetDate, globalSettings, anchorDate
     }
     
     // Determine modulus based on how many groups there are
-    const daftarMustahiq = globalSettings?.daftar_mustahiq || SEMUA_BAPAK;
+    const daftarMustahiq = globalSettings?.daftar_mustahiq || FALLBACK_BAPAK;
     const numGroups = Math.ceil(daftarMustahiq.length / 2);
     
     return activeDaysPassed % (numGroups || 1);
