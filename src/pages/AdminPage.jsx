@@ -293,7 +293,8 @@ export default function AdminPage() {
                   <select 
                     value={newKategori}
                     onChange={e => setNewKategori(e.target.value)}
-                    className="bg-gray-50 border border-gray-200 text-xs px-2 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-bold text-blue-700"
+                    className="bg-gradient-to-br from-blue-50 to-white border-2 border-blue-200 text-xs px-3 py-2 rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 font-black text-blue-800 shadow-sm transition-all hover:border-blue-300 cursor-pointer appearance-none"
+                    style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232563EB%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.4-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.5rem top 50%', backgroundSize: '0.65rem auto', paddingRight: '1.75rem' }}
                   >
                     <option value="A">A</option>
                     <option value="B">B</option>
@@ -313,9 +314,9 @@ export default function AdminPage() {
                 </div>
                 <div className="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
                   {daftarMustahiq.map((m, idx) => (
-                    <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 p-2 rounded-lg text-[11px] font-bold text-gray-700 shadow-sm">
+                    <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 p-2 rounded-lg text-[11px] font-bold text-gray-700 shadow-sm hover:border-blue-200 transition-colors">
                       <span className="flex items-center gap-2">
-                        <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[9px] font-black tracking-wider">BAGIAN {m.kategori}</span>
+                        <span className="bg-blue-100 text-blue-800 w-5 h-5 flex items-center justify-center rounded text-[10px] font-black shadow-sm border border-blue-200/50">{m.kategori}</span>
                         <span>{idx + 1}. {m.nama}</span>
                       </span>
                       <button onClick={() => removeMustahiq(idx)} className="text-red-400 hover:text-red-600 p-1">
