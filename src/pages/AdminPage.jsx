@@ -70,6 +70,12 @@ export default function AdminPage() {
   const [newMustahiq, setNewMustahiq] = useState('');
   const [newKategori, setNewKategori] = useState('A');
 
+  // Auth Modal States
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  // Daily Schedule States
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   
   // State manual override for the selected date
@@ -142,6 +148,30 @@ export default function AdminPage() {
       fetchGlobalSettings();
     } else {
       showToast('Gagal menyimpan pengaturan', 'error');
+    }
+  };
+
+  const handleAuthAndAcak = async () => {
+    if (!adminPassword) return;
+    setIsAuthenticating(true);
+    
+    const { error } = await supabase.auth.signInWithPassword({
+      email: 'admin@mazeeda.com',
+      password: adminPassword,
+    });
+    
+    if (error) {
+      showToast('Password salah atau gagal login', 'error');
+      setIsAuthenticating(false);
+    } else {
+      setShowAuthModal(false);
+      setAdminPassword('');
+      setIsAuthenticating(false);
+      
+      const nowStr = new Date().toISOString();
+      saveSettingsToDB({ updated_at: nowStr });
+      setGlobalSettings(prev => ({ ...prev, updated_at: nowStr }));
+      showToast('Rotasi berhasil diacak ulang!', 'success');
     }
   };
 
@@ -364,11 +394,7 @@ export default function AdminPage() {
                     </span>
                   </p>
                   <button 
-                    onClick={() => {
-                      const nowStr = new Date().toISOString();
-                      saveSettingsToDB({ updated_at: nowStr });
-                      setGlobalSettings(prev => ({ ...prev, updated_at: nowStr }));
-                    }}
+                    onClick={() => setShowAuthModal(true)}
                     className="flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-50 transition-colors shadow-sm w-fit"
                   >
                     <FiRefreshCw /> Acak Ulang Sekarang
@@ -513,6 +539,56 @@ export default function AdminPage() {
 
         </div>
       </div>
+
+      {/* Auth Modal untuk Acak Ulang */}
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="bg-blue-600 p-4 text-center">
+              <h3 className="text-white font-extrabold text-lg">Verifikasi Keamanan</h3>
+              <p className="text-blue-100 text-xs mt-1">Gunakan akun admin@mazeeda.com</p>
+            </div>
+            <div className="p-5 flex flex-col gap-4">
+              <div>
+                <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Password</label>
+                <input 
+                  type="password" 
+                  autoFocus
+                  value={adminPassword}
+                  onChange={e => setAdminPassword(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && adminPassword && !isAuthenticating) {
+                      handleAuthAndAcak();
+                    }
+                  }}
+                  className="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
+                  placeholder="Masukkan password admin..."
+                />
+              </div>
+              <div className="flex gap-2 mt-2">
+                <button 
+                  onClick={() => {
+                    setShowAuthModal(false);
+                    setAdminPassword('');
+                  }}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
+                  disabled={isAuthenticating}
+                >
+                  Batal
+                </button>
+                <button 
+                  onClick={handleAuthAndAcak}
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+                  disabled={isAuthenticating || !adminPassword}
+                >
+                  {isAuthenticating ? <FiRefreshCw className="animate-spin" /> : 'Verifikasi'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
