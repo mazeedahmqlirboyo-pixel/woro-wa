@@ -50,8 +50,9 @@ export const getActiveAlbaqorohTeam = () => {
     : { label: "TIM 2", anggota: TIM_ALBAQOROH_2 };
 };
 
-export const getMusylailShiftIndexAuto = (targetDate, globalSettings, anchorDate = new Date(2026, 4, 25)) => {
-  const start = new Date(anchorDate);
+export const getMusylailShiftIndexAuto = (targetDate, globalSettings) => {
+  const anchorDateStr = globalSettings?.updated_at;
+  const start = anchorDateStr ? new Date(anchorDateStr) : new Date(2026, 7, 29);
   start.setHours(0,0,0,0);
   
   const target = new Date(targetDate);
@@ -92,8 +93,8 @@ export const getMusylailGroups = (settings, targetDate) => {
     return settings.manual_groups;
   }
 
-  // Anchor date dinamis dari DB, fallback ke 29 Agustus 2026
-  const anchorDateStr = settings?.anchor_date;
+  // Anchor date dinamis dari updated_at DB
+  const anchorDateStr = settings?.updated_at;
   const anchorDate = anchorDateStr ? new Date(anchorDateStr) : new Date(2026, 7, 29);
   anchorDate.setHours(0,0,0,0);
   
@@ -154,8 +155,8 @@ export const getMusylailGroups = (settings, targetDate) => {
   let dynamicGroups = [];
 
   while (!validGroupsFound && attempt < 100) {
-    const seedOffset = settings?.seed_offset || 0;
-    const currentSeed = periodsPassed + 77777 + seedOffset + attempt;
+    const timeSeed = settings?.updated_at ? new Date(settings.updated_at).getTime() % 10000 : 0;
+    const currentSeed = periodsPassed + 77777 + timeSeed + attempt;
     const shuffledList = seededShuffle(daftarMustahiq, currentSeed);
     
     dynamicGroups = [];
@@ -187,7 +188,7 @@ export const getMusylailGroups = (settings, targetDate) => {
 };
 
 export const getDaysUntilNextRotation = (targetDate, globalSettings) => {
-  const anchorDateStr = globalSettings?.anchor_date;
+  const anchorDateStr = globalSettings?.updated_at;
   const anchorDate = anchorDateStr ? new Date(anchorDateStr) : new Date(2026, 7, 29);
   anchorDate.setHours(0,0,0,0);
   

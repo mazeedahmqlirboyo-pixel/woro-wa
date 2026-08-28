@@ -365,10 +365,9 @@ export default function AdminPage() {
                   </p>
                   <button 
                     onClick={() => {
-                      const randomSeed = Math.floor(Math.random() * 10000);
                       const nowStr = new Date().toISOString();
-                      saveSettingsToDB({ seed_offset: randomSeed, anchor_date: nowStr });
-                      setGlobalSettings(prev => ({ ...prev, seed_offset: randomSeed, anchor_date: nowStr }));
+                      saveSettingsToDB({ updated_at: nowStr });
+                      setGlobalSettings(prev => ({ ...prev, updated_at: nowStr }));
                     }}
                     className="flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-50 transition-colors shadow-sm w-fit"
                   >
