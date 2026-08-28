@@ -332,7 +332,7 @@ export default function PublicPage() {
 
       {/* TOAST NOTIFICATION */}
       <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 transform ${toast.show ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95 pointer-events-none'}`}>
-        <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md ${toast.type === 'success' ? 'bg-emerald-600/95 border-emerald-500 text-white shadow-emerald-500/30' : 'bg-red-500/95 border-red-400 text-white shadow-red-500/30'}`}>
+        <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md ${toast.type === 'success' ? 'bg-blue-600/95 border-blue-500 text-white shadow-blue-500/30' : 'bg-red-500/95 border-red-400 text-white shadow-red-500/30'}`}>
           <div className="bg-white/20 p-2 rounded-full">
             {toast.type === 'success' ? <FiCheckSquare className="text-xl" /> : <FiInfo className="text-xl" />}
           </div>
@@ -611,26 +611,26 @@ export default function PublicPage() {
           {/* VIEW: EXTRA PAGI */}
           {activeTab === 'extra' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <section className="bg-white border border-amber-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <h2 className="text-xs font-black text-center text-amber-500 tracking-[0.2em] mb-3 uppercase relative z-10">Piket Extra Pagi</h2>
+              <section className="bg-white border border-blue-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                <h2 className="text-xs font-black text-center text-blue-500 tracking-[0.2em] mb-3 uppercase relative z-10">Piket Extra Pagi</h2>
                 
                 {/* Navigasi Tanggal */}
-                <div className="flex items-center justify-between gap-2 mb-4 bg-amber-950/5 p-2 rounded-2xl relative z-10">
+                <div className="flex items-center justify-between gap-2 mb-4 bg-blue-950/5 p-2 rounded-2xl relative z-10">
                   <button
                     onClick={() => {
                       const prev = new Date(selectedDateExtra);
                       prev.setDate(prev.getDate() - 1);
                       setSelectedDateExtra(prev);
                     }}
-                    className="p-2 bg-white hover:bg-amber-50 border border-amber-100 text-amber-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
+                    className="p-2 bg-white hover:bg-blue-50 border border-blue-100 text-blue-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
                   </button>
 
                   <div className="text-center flex-1">
-                    <div className="text-xs font-extrabold text-amber-500 uppercase tracking-wider">{pagiIni}</div>
-                    <div className="text-[14px] font-black text-amber-950 mt-0.5">{formatDateIndo(selectedDateExtra)}</div>
+                    <div className="text-xs font-extrabold text-blue-500 uppercase tracking-wider">{pagiIni}</div>
+                    <div className="text-[14px] font-black text-blue-950 mt-0.5">{formatDateIndo(selectedDateExtra)}</div>
                   </div>
 
                   <button
@@ -639,7 +639,7 @@ export default function PublicPage() {
                       next.setDate(next.getDate() + 1);
                       setSelectedDateExtra(next);
                     }}
-                    className="p-2 bg-white hover:bg-amber-50 border border-amber-100 text-amber-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
+                    className="p-2 bg-white hover:bg-blue-50 border border-blue-100 text-blue-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
                   </button>
@@ -647,20 +647,20 @@ export default function PublicPage() {
 
                 {petugasPagiIni.length > 0 ? (
                   <div className="space-y-3 relative z-10">
-                    <label className="flex items-center gap-4 cursor-pointer bg-amber-600/5 px-5 py-3 rounded-2xl hover:bg-amber-600/10 transition-colors">
+                    <label className="flex items-center gap-4 cursor-pointer bg-blue-600/5 px-5 py-3 rounded-2xl hover:bg-blue-600/10 transition-colors">
                       <div className="relative flex items-center">
                         <input
                           type="checkbox"
                           checked={selectedPetugasExtra.length > 0 && selectedPetugasExtra.length === petugasPagiIni.length}
                           onChange={(e) => setSelectedPetugasExtra(e.target.checked ? petugasPagiIni : [])}
-                          className="peer w-6 h-6 appearance-none rounded-lg border-2 border-amber-200 checked:bg-amber-500 checked:border-amber-500 transition-all cursor-pointer"
+                          className="peer w-6 h-6 appearance-none rounded-lg border-2 border-blue-200 checked:bg-blue-500 checked:border-blue-500 transition-all cursor-pointer"
                         />
                         <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                       </div>
-                      <span className="font-extrabold text-[15px] text-amber-900">Pilih Semua Bapak</span>
+                      <span className="font-extrabold text-[15px] text-blue-900">Pilih Semua Bapak</span>
                     </label>
                     {petugasPagiIni.map((petugas, idx) => (
-                      <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-amber-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-amber-200 transition-all">
+                      <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-blue-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-blue-200 transition-all">
                         <div className="relative flex items-center">
                           <input
                             type="checkbox"
@@ -669,16 +669,16 @@ export default function PublicPage() {
                               if (selectedPetugasExtra.includes(petugas)) setSelectedPetugasExtra(selectedPetugasExtra.filter(p => p !== petugas));
                               else setSelectedPetugasExtra([...selectedPetugasExtra, petugas]);
                             }}
-                            className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-amber-500 checked:border-amber-500 transition-all cursor-pointer"
+                            className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-blue-500 checked:border-blue-500 transition-all cursor-pointer"
                           />
                           <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                         </div>
-                        <span className="group-hover:text-amber-900 transition-colors">{petugas}</span>
+                        <span className="group-hover:text-blue-900 transition-colors">{petugas}</span>
                       </label>
                     ))}
                   </div>
                 ) : (
-                  <div className="bg-white/80 backdrop-blur-sm px-6 py-5 rounded-2xl font-bold text-amber-400 border border-amber-100/50 text-center shadow-sm relative z-10">
+                  <div className="bg-white/80 backdrop-blur-sm px-6 py-5 rounded-2xl font-bold text-blue-400 border border-blue-100/50 text-center shadow-sm relative z-10">
                     ✨ Tidak ada jadwal piket pagi ini
                   </div>
                 )}
@@ -687,7 +687,7 @@ export default function PublicPage() {
               <section>
                 <button
                   onClick={handleGenerateExtra}
-                  className="w-full py-4 bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-amber-200 flex justify-center items-center gap-3 transition-all"
+                  className="w-full py-4 bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-blue-200 flex justify-center items-center gap-3 transition-all"
                 >
                   <FiRefreshCw className={`text-xl ${messageExtra ? "" : "animate-spin-slow"}`} />
                   Generate Pesan Extra Pagi
@@ -695,13 +695,13 @@ export default function PublicPage() {
               </section>
 
               <section className="space-y-3">
-                <h2 className="text-sm font-bold text-amber-900/60 flex items-center gap-2 uppercase tracking-wider pl-1">
+                <h2 className="text-sm font-bold text-blue-900/60 flex items-center gap-2 uppercase tracking-wider pl-1">
                   <FiEdit3 className="text-lg" /> Preview & Edit
                 </h2>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-amber-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                  <div className="absolute -inset-0.5 bg-blue-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                   <textarea
-                    className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-amber-100 focus:border-amber-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
+                    className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-blue-100 focus:border-blue-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
                     placeholder="Pesan Extra otomatis muncul di sini..."
                     value={messageExtra}
                     onChange={(e) => setMessageExtra(e.target.value)}
@@ -727,27 +727,27 @@ export default function PublicPage() {
           {/* VIEW: SOROGAN HMQ */}
           {activeTab === 'hmq' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <section className="bg-white border border-emerald-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <h2 className="text-xs font-black text-center text-emerald-500 tracking-[0.2em] mb-4 uppercase flex items-center justify-center gap-2 relative z-10">
+              <section className="bg-white border border-blue-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                <h2 className="text-xs font-black text-center text-blue-500 tracking-[0.2em] mb-4 uppercase flex items-center justify-center gap-2 relative z-10">
                   <FiBookOpen className="text-sm" /> Sorogan HMQ
                 </h2>
 
                 <div className="space-y-3 h-80 overflow-y-auto pr-2 custom-scrollbar relative z-10">
-                  <label className="flex items-center gap-4 cursor-pointer bg-emerald-600/5 px-5 py-3 rounded-2xl hover:bg-emerald-600/10 transition-colors sticky top-0 backdrop-blur-xl z-20">
+                  <label className="flex items-center gap-4 cursor-pointer bg-blue-600/5 px-5 py-3 rounded-2xl hover:bg-blue-600/10 transition-colors sticky top-0 backdrop-blur-xl z-20">
                     <div className="relative flex items-center">
                       <input
                         type="checkbox"
                         checked={selectedHmq.length === SEMUA_BAPAK.length}
                         onChange={(e) => setSelectedHmq(e.target.checked ? SEMUA_BAPAK : [])}
-                        className="peer w-6 h-6 appearance-none rounded-lg border-2 border-emerald-200 checked:bg-emerald-500 checked:border-emerald-500 transition-all cursor-pointer"
+                        className="peer w-6 h-6 appearance-none rounded-lg border-2 border-blue-200 checked:bg-blue-500 checked:border-blue-500 transition-all cursor-pointer"
                       />
                       <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                     </div>
-                    <span className="font-extrabold text-[15px] text-emerald-900">Pilih Semua Bapak</span>
+                    <span className="font-extrabold text-[15px] text-blue-900">Pilih Semua Bapak</span>
                   </label>
                   {SEMUA_BAPAK.map((petugas, idx) => (
-                    <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-emerald-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-emerald-200 transition-all">
+                    <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-blue-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-blue-200 transition-all">
                       <div className="relative flex items-center">
                         <input
                           type="checkbox"
@@ -756,11 +756,11 @@ export default function PublicPage() {
                             if (selectedHmq.includes(petugas)) setSelectedHmq(selectedHmq.filter(p => p !== petugas));
                             else setSelectedHmq([...selectedHmq, petugas]);
                           }}
-                          className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-emerald-500 checked:border-emerald-500 transition-all cursor-pointer"
+                          className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-blue-500 checked:border-blue-500 transition-all cursor-pointer"
                         />
                         <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                       </div>
-                      <span className="group-hover:text-emerald-900 transition-colors">{petugas}</span>
+                      <span className="group-hover:text-blue-900 transition-colors">{petugas}</span>
                     </label>
                   ))}
                 </div>
@@ -769,7 +769,7 @@ export default function PublicPage() {
               <section>
                 <button
                   onClick={handleGenerateHmq}
-                  className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-emerald-200 flex justify-center items-center gap-3 transition-all"
+                  className="w-full py-4 bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-blue-200 flex justify-center items-center gap-3 transition-all"
                 >
                   <FiRefreshCw className={`text-xl ${messageHmq ? "" : "animate-spin-slow"}`} />
                   Generate Pesan Sorogan HMQ
@@ -777,13 +777,13 @@ export default function PublicPage() {
               </section>
 
               <section className="space-y-3">
-                <h2 className="text-sm font-bold text-emerald-900/60 flex items-center gap-2 uppercase tracking-wider pl-1">
+                <h2 className="text-sm font-bold text-blue-900/60 flex items-center gap-2 uppercase tracking-wider pl-1">
                   <FiEdit3 className="text-lg" /> Preview & Edit
                 </h2>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-emerald-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                  <div className="absolute -inset-0.5 bg-blue-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                   <textarea
-                    className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
+                    className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-blue-100 focus:border-blue-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
                     placeholder="Pesan HMQ otomatis muncul di sini..."
                     value={messageHmq}
                     onChange={(e) => setMessageHmq(e.target.value)}
@@ -809,31 +809,31 @@ export default function PublicPage() {
           {/* VIEW: SOROGAN AL-BAQOROH */}
           {activeTab === 'albaqoroh' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <section className="bg-white border border-sky-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-sky-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <h2 className="text-xs font-black text-center text-sky-500 tracking-[0.2em] mb-4 uppercase flex items-center justify-center gap-2 relative z-10">
+              <section className="bg-white border border-blue-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                <h2 className="text-xs font-black text-center text-blue-500 tracking-[0.2em] mb-4 uppercase flex items-center justify-center gap-2 relative z-10">
                   <FiBookOpen className="text-sm" /> Opsi AL-BAQOROH
                 </h2>
 
                 <div className="space-y-3 h-80 overflow-y-auto pr-2 custom-scrollbar relative z-10">
-                  <div className="bg-sky-100/50 p-4 rounded-2xl border border-sky-200 mb-4 text-center">
-                    <p className="text-sky-800 font-bold text-sm mb-1">Minggu ini giliran:</p>
-                    <p className="text-sky-900 font-black text-2xl">{timAktifAlbaqorohLabel}</p>
+                  <div className="bg-blue-100/50 p-4 rounded-2xl border border-blue-200 mb-4 text-center">
+                    <p className="text-blue-800 font-bold text-sm mb-1">Minggu ini giliran:</p>
+                    <p className="text-blue-900 font-black text-2xl">{timAktifAlbaqorohLabel}</p>
                   </div>
-                  <label className="flex items-center gap-4 cursor-pointer bg-sky-600/5 px-5 py-3 rounded-2xl hover:bg-sky-600/10 transition-colors sticky top-0 backdrop-blur-xl z-20">
+                  <label className="flex items-center gap-4 cursor-pointer bg-blue-600/5 px-5 py-3 rounded-2xl hover:bg-blue-600/10 transition-colors sticky top-0 backdrop-blur-xl z-20">
                     <div className="relative flex items-center">
                       <input
                         type="checkbox"
                         checked={selectedAlbaqoroh.length === getActiveAlbaqorohTeam().anggota.length && getActiveAlbaqorohTeam().anggota.every(a => selectedAlbaqoroh.includes(a))}
                         onChange={(e) => setSelectedAlbaqoroh(e.target.checked ? getActiveAlbaqorohTeam().anggota : [])}
-                        className="peer w-6 h-6 appearance-none rounded-lg border-2 border-sky-200 checked:bg-sky-500 checked:border-sky-500 transition-all cursor-pointer"
+                        className="peer w-6 h-6 appearance-none rounded-lg border-2 border-blue-200 checked:bg-blue-500 checked:border-blue-500 transition-all cursor-pointer"
                       />
                       <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                     </div>
-                    <span className="font-extrabold text-[15px] text-sky-900">Pilih Anggota {timAktifAlbaqorohLabel} (Otomatis)</span>
+                    <span className="font-extrabold text-[15px] text-blue-900">Pilih Anggota {timAktifAlbaqorohLabel} (Otomatis)</span>
                   </label>
                   {SEMUA_BAPAK.map((petugas, idx) => (
-                    <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-sky-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-sky-200 transition-all">
+                    <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-blue-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-blue-200 transition-all">
                       <div className="relative flex items-center">
                         <input
                           type="checkbox"
@@ -842,11 +842,11 @@ export default function PublicPage() {
                             if (selectedAlbaqoroh.includes(petugas)) setSelectedAlbaqoroh(selectedAlbaqoroh.filter(p => p !== petugas));
                             else setSelectedAlbaqoroh([...selectedAlbaqoroh, petugas]);
                           }}
-                          className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-sky-500 checked:border-sky-500 transition-all cursor-pointer"
+                          className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-blue-500 checked:border-blue-500 transition-all cursor-pointer"
                         />
                         <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                       </div>
-                      <span className="group-hover:text-sky-900 transition-colors">{petugas}</span>
+                      <span className="group-hover:text-blue-900 transition-colors">{petugas}</span>
                     </label>
                   ))}
                 </div>
@@ -855,7 +855,7 @@ export default function PublicPage() {
               <section>
                 <button
                   onClick={handleGenerateAlbaqoroh}
-                  className="w-full py-4 bg-sky-500 hover:bg-sky-600 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-sky-200 flex justify-center items-center gap-3 transition-all"
+                  className="w-full py-4 bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-blue-200 flex justify-center items-center gap-3 transition-all"
                 >
                   <FiRefreshCw className={`text-xl ${messageAlbaqoroh ? "" : "animate-spin-slow"}`} />
                   Generate Pesan Sorogan Al-Baqoroh
@@ -863,13 +863,13 @@ export default function PublicPage() {
               </section>
 
               <section className="space-y-3">
-                <h2 className="text-sm font-bold text-sky-900/60 flex items-center gap-2 uppercase tracking-wider pl-1">
+                <h2 className="text-sm font-bold text-blue-900/60 flex items-center gap-2 uppercase tracking-wider pl-1">
                   <FiEdit3 className="text-lg" /> Preview & Edit
                 </h2>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-sky-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                  <div className="absolute -inset-0.5 bg-blue-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                   <textarea
-                    className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-sky-100 focus:border-sky-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
+                    className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-blue-100 focus:border-blue-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
                     placeholder="Pesan Al-Baqoroh otomatis muncul di sini..."
                     value={messageAlbaqoroh}
                     onChange={(e) => setMessageAlbaqoroh(e.target.value)}
