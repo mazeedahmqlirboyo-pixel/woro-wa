@@ -138,7 +138,8 @@ export const getMusylailGroups = (settings, targetDate) => {
   let dynamicGroups = [];
 
   while (!validGroupsFound && attempt < 100) {
-    const currentSeed = periodsPassed + 98765 + attempt;
+    const seedOffset = settings?.seed_offset || 0;
+    const currentSeed = periodsPassed + 98765 + seedOffset + attempt;
     const shuffledList = seededShuffle(daftarMustahiq, currentSeed);
     
     dynamicGroups = [];
