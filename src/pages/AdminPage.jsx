@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { FiHome, FiSettings, FiCalendar, FiCheckSquare, FiInfo, FiTrash2, FiSave } from 'react-icons/fi';
 import { supabase } from '../supabaseClient';
 import { SEMUA_BAPAK, LABEL_MALAM } from '../utils/constants';
 import { formatDateIndo } from '../utils/helpers';
+import logoWoro from '../assets/512.png.png';
 
 export default function AdminPage() {
   const [isMalamSabtuActive, setIsMalamSabtuActive] = useState(false);
@@ -27,7 +29,7 @@ export default function AdminPage() {
   }, [selectedDate]);
 
   const fetchGlobalSettings = async () => {
-    const { data, error } = await supabase.from('settings').select('*').eq('id', 'global').single();
+    const { data } = await supabase.from('settings').select('*').eq('id', 'global').single();
     if (data) {
       setIsMalamSabtuActive(data.is_malam_sabtu_active);
     }
@@ -35,7 +37,7 @@ export default function AdminPage() {
 
   const fetchDailyOverride = async () => {
     const dateStr = selectedDate.toISOString().split('T')[0];
-    const { data, error } = await supabase.from('jadwal_musylail').select('*').eq('tanggal', dateStr).single();
+    const { data } = await supabase.from('jadwal_musylail').select('*').eq('tanggal', dateStr).single();
     
     if (data) {
       setManualPetugas(data.petugas || []);
@@ -73,7 +75,7 @@ export default function AdminPage() {
     const { error } = await supabase.from('jadwal_musylail').delete().eq('tanggal', dateStr);
     
     if (!error) {
-      showToast('Override jadwal dihapus (kembali ke jadwal otomatis)');
+      showToast('Override jadwal dihapus (kembali ke otomatis)');
       setManualPetugas([]);
       setIsLibur(false);
     } else {
@@ -90,114 +92,156 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans pb-8">
-      {/* Toast */}
-      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${toast.show ? 'translate-y-0 opacity-100' : '-translate-y-10 opacity-0 pointer-events-none'}`}>
-        <div className={`flex items-center gap-3 px-6 py-3 rounded-xl shadow-lg border ${toast.type === 'success' ? 'bg-[#0066AE] border-blue-700 text-white' : 'bg-red-600 border-red-700 text-white'}`}>
-          <span className="font-semibold text-sm">{toast.message}</span>
+    <div className="min-h-screen bg-blue-50 flex flex-col items-center pb-8 font-sans selection:bg-blue-200 selection:text-blue-900">
+      
+      {/* TOAST NOTIFICATION */}
+      <div className={`fixed top-5 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 transform ${toast.show ? 'translate-y-0 opacity-100 scale-100' : '-translate-y-10 opacity-0 scale-95 pointer-events-none'}`}>
+        <div className={`flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md ${toast.type === 'success' ? 'bg-blue-600/95 border-blue-500 text-white shadow-blue-500/30' : 'bg-red-500/95 border-red-400 text-white shadow-red-500/30'}`}>
+          <div className="bg-white/20 p-2 rounded-full">
+            {toast.type === 'success' ? <FiCheckSquare className="text-xl" /> : <FiInfo className="text-xl" />}
+          </div>
+          <span className="font-extrabold text-[15px]">{toast.message}</span>
         </div>
       </div>
 
-      {/* Header */}
-      <header className="bg-[#0066AE] text-white shadow-md">
-        <div className="max-w-md mx-auto px-5 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-bold">Admin Panel</h1>
-          <a href="/" className="text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-md font-medium transition">Ke Beranda</a>
-        </div>
-      </header>
-
-      <main className="max-w-md mx-auto p-5 space-y-6">
+      <div className="w-full max-w-md bg-white/70 backdrop-blur-2xl min-h-screen shadow-[0_8px_30px_rgb(0,0,0,0.08)] relative pb-6 sm:my-10 sm:min-h-0 sm:rounded-[2.5rem] border border-white overflow-hidden transition-all duration-500">
         
-        {/* Global Settings */}
-        <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-4">
-          <h2 className="text-sm font-bold text-gray-800 border-b pb-2">Pengaturan Global</h2>
-          <label className="flex items-center justify-between cursor-pointer">
-            <span className="text-sm font-medium text-gray-700">Aktifkan Malam Sabtu</span>
-            <input 
-              type="checkbox" 
-              checked={isMalamSabtuActive}
-              onChange={(e) => saveGlobalSettings(e.target.checked)}
-              className="w-5 h-5 text-[#0066AE] rounded focus:ring-[#0066AE]"
-            />
-          </label>
-        </section>
-
-        {/* Daily Schedule Override */}
-        <section className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 space-y-4">
-          <h2 className="text-sm font-bold text-gray-800 border-b pb-2">Atur Jadwal Manual Per Hari</h2>
-          
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => {
-                const prev = new Date(selectedDate);
-                prev.setDate(prev.getDate() - 1);
-                setSelectedDate(prev);
-              }}
-              className="p-2 bg-gray-50 text-[#0066AE] rounded-lg"
-            >
-              &larr;
-            </button>
-            <div className="text-center">
-              <div className="text-xs text-gray-500">{LABEL_MALAM[selectedDate.getDay()]}</div>
-              <div className="text-sm font-bold text-[#0066AE]">{formatDateIndo(selectedDate)}</div>
-            </div>
-            <button
-              onClick={() => {
-                const next = new Date(selectedDate);
-                next.setDate(next.getDate() + 1);
-                setSelectedDate(next);
-              }}
-              className="p-2 bg-gray-50 text-[#0066AE] rounded-lg"
-            >
-              &rarr;
-            </button>
-          </div>
-
-          <div className="space-y-3 pt-2 border-t border-gray-100">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input 
-                type="checkbox"
-                checked={isLibur}
-                onChange={(e) => setIsLibur(e.target.checked)}
-                className="w-4 h-4 text-[#0066AE]"
-              />
-              <span className="text-sm font-medium text-red-600">Jadikan Hari Ini Libur</span>
-            </label>
-
-            {!isLibur && (
-              <div className="space-y-2 mt-4 max-h-60 overflow-y-auto">
-                {SEMUA_BAPAK.map(bapak => (
-                  <label key={bapak} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors">
-                    <input 
-                      type="checkbox"
-                      checked={manualPetugas.includes(bapak)}
-                      onChange={() => togglePetugas(bapak)}
-                      className="w-4 h-4 text-[#0066AE]"
-                    />
-                    <span className="text-sm text-gray-700">{bapak}</span>
-                  </label>
-                ))}
+        {/* Header - Sticky */}
+        <header id="header" className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-white/50">
+          <div className="flex items-center justify-between px-6 pt-6 pb-5">
+            <div className="flex items-center gap-4">
+              <img src={logoWoro} alt="Logo Mazeeda" className="w-14 h-14 rounded-2xl shadow-lg shadow-blue-200 object-cover border border-blue-50" />
+              <div>
+                <h1 className="text-xl font-black text-blue-800 leading-tight">PANEL ADMIN</h1>
+                <p className="text-[10px] text-blue-500/80 font-bold tracking-[0.2em] uppercase mt-0.5">MAZEEDA WORO-WORO</p>
               </div>
-            )}
+            </div>
+            
+            <a href="/" className="p-2 text-blue-600 hover:text-blue-800 bg-blue-100 hover:bg-blue-200 rounded-xl transition-colors" title="Kembali ke Beranda">
+              <FiHome className="w-5 h-5" />
+            </a>
+          </div>
+        </header>
 
-            <div className="flex gap-2 pt-4">
-              <button 
-                onClick={saveDailyOverride}
-                className="flex-1 py-2 bg-[#0066AE] text-white text-sm font-bold rounded-lg hover:bg-blue-700 transition-colors"
+        <div className="p-6 space-y-8">
+          
+          {/* Global Settings */}
+          <section className="bg-white border border-blue-100 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
+            <h2 className="text-xs font-black text-blue-600 tracking-[0.2em] mb-4 uppercase flex items-center gap-2 relative z-10">
+              <FiSettings className="text-lg" /> PENGATURAN GLOBAL
+            </h2>
+            
+            <p className="text-xs text-gray-500 mb-4 leading-relaxed relative z-10 font-medium">
+              Jika diaktifkan, piket Malam Sabtu akan masuk ke dalam putaran shift otomatis mingguan. Jika dimatikan, Malam Sabtu dianggap hari libur.
+            </p>
+            
+            <label className="flex items-center justify-between cursor-pointer bg-blue-50/50 p-4 rounded-2xl border border-blue-100 relative z-10 hover:bg-blue-50 transition-colors">
+              <span className="text-[15px] font-extrabold text-blue-900">Aktifkan Malam Sabtu</span>
+              <div className="relative inline-flex items-center">
+                <input 
+                  type="checkbox" 
+                  checked={isMalamSabtuActive}
+                  onChange={(e) => saveGlobalSettings(e.target.checked)}
+                  className="sr-only peer" 
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </div>
+            </label>
+          </section>
+
+          {/* Daily Override */}
+          <section className="bg-white border border-blue-100 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+            <h2 className="text-xs font-black text-blue-600 tracking-[0.2em] mb-4 uppercase flex items-center gap-2 relative z-10">
+              <FiCalendar className="text-lg" /> JADWAL MANUAL PER HARI
+            </h2>
+            
+            <p className="text-xs text-gray-500 mb-5 leading-relaxed relative z-10 font-medium">
+              Gunakan fitur ini untuk merubah jadwal di hari tertentu (misal: tukar piket / meliburkan). Perubahan di sini <strong>tidak akan merusak</strong> jadwal otomatis di hari-hari lainnya.
+            </p>
+
+            {/* Navigasi Tanggal */}
+            <div className="flex items-center justify-between gap-2 mb-5 bg-blue-50/50 p-3 rounded-2xl border border-blue-100 relative z-10">
+              <button
+                onClick={() => {
+                  const prev = new Date(selectedDate);
+                  prev.setDate(prev.getDate() - 1);
+                  setSelectedDate(prev);
+                }}
+                className="p-2.5 bg-white hover:bg-blue-100 border border-blue-100 text-blue-600 rounded-xl transition-all shadow-sm active:scale-95"
               >
-                Simpan
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
               </button>
-              <button 
-                onClick={deleteDailyOverride}
-                className="flex-1 py-2 bg-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-300 transition-colors"
+
+              <div className="text-center flex-1">
+                <div className="text-[11px] font-extrabold text-blue-500 uppercase tracking-wider">{LABEL_MALAM[selectedDate.getDay()]}</div>
+                <div className="text-[15px] font-black text-blue-950 mt-0.5">{formatDateIndo(selectedDate)}</div>
+              </div>
+
+              <button
+                onClick={() => {
+                  const next = new Date(selectedDate);
+                  next.setDate(next.getDate() + 1);
+                  setSelectedDate(next);
+                }}
+                className="p-2.5 bg-white hover:bg-blue-100 border border-blue-100 text-blue-600 rounded-xl transition-all shadow-sm active:scale-95"
               >
-                Reset ke Auto
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
               </button>
             </div>
-          </div>
-        </section>
 
-      </main>
+            <div className="space-y-4 relative z-10">
+              <label className="flex items-center gap-4 cursor-pointer bg-red-50/50 px-5 py-4 rounded-2xl hover:bg-red-50 transition-colors border border-red-100">
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={isLibur}
+                    onChange={(e) => setIsLibur(e.target.checked)}
+                    className="peer w-6 h-6 appearance-none rounded-lg border-2 border-red-200 checked:bg-red-500 checked:border-red-500 transition-all cursor-pointer"
+                  />
+                  <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
+                </div>
+                <span className="font-extrabold text-[15px] text-red-700">Jadikan Hari Ini Libur</span>
+              </label>
+
+              {!isLibur && (
+                <div className="space-y-2 h-64 overflow-y-auto pr-2 custom-scrollbar bg-gray-50/50 p-2 rounded-2xl border border-gray-100">
+                  {SEMUA_BAPAK.map(bapak => (
+                    <label key={bapak} className="group flex items-center gap-4 bg-white px-4 py-3.5 rounded-xl font-bold text-gray-700 shadow-sm border border-blue-50/50 text-[14px] cursor-pointer hover:shadow-md hover:border-blue-200 transition-all">
+                      <div className="relative flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={manualPetugas.includes(bapak)}
+                          onChange={() => togglePetugas(bapak)}
+                          className="peer w-5 h-5 appearance-none rounded-lg border-2 border-gray-200 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer"
+                        />
+                        <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-3 h-3" />
+                      </div>
+                      <span className="group-hover:text-blue-900 transition-colors">{bapak}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <button 
+                  onClick={deleteDailyOverride}
+                  className="flex-1 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[14px] font-extrabold rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <FiTrash2 /> Reset (Auto)
+                </button>
+                <button 
+                  onClick={saveDailyOverride}
+                  className="flex-1 py-3.5 bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-extrabold rounded-2xl shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <FiSave /> Simpan
+                </button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
     </div>
   );
 }
