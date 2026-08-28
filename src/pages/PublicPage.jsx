@@ -7,7 +7,11 @@ import {
   TIM_ALBAQOROH_1, TIM_ALBAQOROH_2, INDO_DAYS, INDO_MONTHS 
 } from '../utils/constants';
 import { 
-  formatDateIndo, isToday, getMusylailShiftIndexAuto, getActiveAlbaqorohTeam 
+  formatDateIndo, 
+  isToday, 
+  getActiveAlbaqorohTeam, 
+  getMusylailShiftIndexAuto,
+  getMusylailGroups
 } from '../utils/helpers';
 
 export default function PublicPage() {
@@ -21,6 +25,7 @@ export default function PublicPage() {
   });
 
   // Settings & Data from Supabase
+  const [globalSettings, setGlobalSettings] = useState(null);
   const [isMalamSabtuActive, setIsMalamSabtuActive] = useState(false);
   const [jadwalMusylailManual, setJadwalMusylailManual] = useState({});
   const [jadwalExtra, setJadwalExtra] = useState([]);
@@ -41,6 +46,7 @@ export default function PublicPage() {
       const { data: settings } = await supabase.from('settings').select('*').eq('id', 'global').single();
       if (settings) {
         setIsMalamSabtuActive(settings.is_malam_sabtu_active);
+        setGlobalSettings(settings);
       }
 
       const { data: manualSchedules } = await supabase.from('jadwal_musylail').select('*');
@@ -292,7 +298,7 @@ export default function PublicPage() {
     </button>
   );
 
-  const getUpcomingMusylailDays = (startDate, isMalamSabtuActive, count = 7) => {
+  const getUpcomingMusylailDays = (startDate, isMalamSabtuActive, globalSettings, count = 7) => {
     const days = [];
     for (let i = 0; i < count; i++) {
       const d = new Date(startDate);
@@ -313,7 +319,8 @@ export default function PublicPage() {
         isOff = isJumat || (isSabtu && !isMalamSabtuActive);
         if (!isOff) {
           const shiftIndex = getMusylailShiftIndexAuto(d, isMalamSabtuActive);
-          petugas = SHIFT_MUSYLAIL[shiftIndex];
+          const currentGroups = getMusylailGroups(globalSettings, d);
+          petugas = currentGroups[shiftIndex];
         }
       }
 
@@ -557,7 +564,7 @@ export default function PublicPage() {
                   </h3>
                 </div>
                 <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                  {getUpcomingMusylailDays(new Date(), isMalamSabtuActive).map((day, idx) => {
+                  {getUpcomingMusylailDays(new Date(), isMalamSabtuActive, globalSettings).map((day, idx) => {
                     const isSelected = selectedDateMusylail.getDate() === day.date.getDate() &&
                                        selectedDateMusylail.getMonth() === day.date.getMonth() &&
                                        selectedDateMusylail.getFullYear() === day.date.getFullYear();

@@ -62,3 +62,34 @@ export const getMusylailShiftIndexAuto = (targetDate, isMalamSabtuActive, anchor
     return 0;
   }
 };
+
+export const getMusylailGroups = (settings, targetDate) => {
+  if (settings && settings.is_auto_rotate_partner === false && settings.manual_groups) {
+    return settings.manual_groups;
+  }
+
+  const anchorDate = new Date(2026, 4, 25);
+  anchorDate.setHours(0,0,0,0);
+  
+  const target = new Date(targetDate || new Date());
+  target.setHours(0,0,0,0);
+  
+  let diffTime = target - anchorDate;
+  if (diffTime < 0) diffTime = 0;
+  
+  const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
+  const periodsPassed = Math.floor(diffWeeks / 2); // Rotate every 2 weeks
+  
+  const offset = periodsPassed % 6;
+
+  const columnA = SHIFT_MUSYLAIL.map(g => g[0]);
+  const columnB = SHIFT_MUSYLAIL.map(g => g[1]);
+
+  const dynamicGroups = [];
+  for (let i = 0; i < 6; i++) {
+    const partnerIndex = (i + offset) % 6;
+    dynamicGroups.push([columnA[i], columnB[partnerIndex]]);
+  }
+  
+  return dynamicGroups;
+};

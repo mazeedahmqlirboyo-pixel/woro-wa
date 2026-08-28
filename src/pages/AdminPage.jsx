@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { FiHome, FiSettings, FiCalendar, FiCheckSquare, FiInfo, FiTrash2, FiSave } from 'react-icons/fi';
+import { FiHome, FiSettings, FiCalendar, FiCheckSquare, FiInfo, FiTrash2, FiSave, FiUsers, FiRefreshCw } from 'react-icons/fi';
 import { supabase } from '../supabaseClient';
-import { SEMUA_BAPAK, LABEL_MALAM } from '../utils/constants';
-import { formatDateIndo } from '../utils/helpers';
+import { SEMUA_BAPAK, LABEL_MALAM, SHIFT_MUSYLAIL } from '../utils/constants';
+import { formatDateIndo, getMusylailGroups } from '../utils/helpers';
 import logoWoro from '../assets/512.png.png';
 
 export default function AdminPage() {
+  const [globalSettings, setGlobalSettings] = useState(null);
   const [isMalamSabtuActive, setIsMalamSabtuActive] = useState(false);
+  const [isAutoRotatePartner, setIsAutoRotatePartner] = useState(true);
+  
+  // For manual group override
+  const [manualGroups, setManualGroups] = useState(SHIFT_MUSYLAIL);
+
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   
   // State manual override for the selected date
@@ -31,7 +37,12 @@ export default function AdminPage() {
   const fetchGlobalSettings = async () => {
     const { data } = await supabase.from('settings').select('*').eq('id', 'global').single();
     if (data) {
-      setIsMalamSabtuActive(data.is_malam_sabtu_active);
+      setGlobalSettings(data);
+      setIsMalamSabtuActive(data.is_malam_sabtu_active ?? false);
+      setIsAutoRotatePartner(data.is_auto_rotate_partner ?? true);
+      if (data.manual_groups) {
+        setManualGroups(data.manual_groups);
+      }
     }
   };
 
@@ -48,11 +59,23 @@ export default function AdminPage() {
     }
   };
 
-  const saveGlobalSettings = async (checked) => {
-    setIsMalamSabtuActive(checked);
-    const { error } = await supabase.from('settings').upsert({ id: 'global', is_malam_sabtu_active: checked });
-    if (!error) showToast('Pengaturan global berhasil disimpan');
+  const saveGlobalSettings = async (field, value) => {
+    // Optimistic UI update
+    if (field === 'is_malam_sabtu_active') setIsMalamSabtuActive(value);
+    if (field === 'is_auto_rotate_partner') setIsAutoRotatePartner(value);
+
+    const { error } = await supabase.from('settings').upsert({ id: 'global', [field]: value });
+    if (!error) {
+      showToast('Pengaturan global berhasil disimpan');
+      fetchGlobalSettings();
+    }
     else showToast('Gagal menyimpan pengaturan', 'error');
+  };
+
+  const saveManualGroups = async () => {
+    const { error } = await supabase.from('settings').upsert({ id: 'global', manual_groups: manualGroups });
+    if (!error) showToast('Susunan pasangan berhasil disimpan');
+    else showToast('Gagal menyimpan pasangan', 'error');
   };
 
   const saveDailyOverride = async () => {
@@ -90,6 +113,16 @@ export default function AdminPage() {
       setManualPetugas([...manualPetugas, bapak]);
     }
   };
+
+  const handleGroupChange = (groupIndex, personIndex, value) => {
+    const newGroups = [...manualGroups];
+    newGroups[groupIndex] = [...newGroups[groupIndex]];
+    newGroups[groupIndex][personIndex] = value;
+    setManualGroups(newGroups);
+  };
+
+  // Get current active groups (for display in auto mode)
+  const currentActiveGroups = getMusylailGroups(globalSettings, new Date());
 
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center pb-8 font-sans selection:bg-blue-200 selection:text-blue-900">
@@ -142,12 +175,85 @@ export default function AdminPage() {
                 <input 
                   type="checkbox" 
                   checked={isMalamSabtuActive}
-                  onChange={(e) => saveGlobalSettings(e.target.checked)}
+                  onChange={(e) => saveGlobalSettings('is_malam_sabtu_active', e.target.checked)}
                   className="sr-only peer" 
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
               </div>
             </label>
+          </section>
+
+          {/* Partner Override Section */}
+          <section className="bg-white border border-blue-100 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+            <h2 className="text-xs font-black text-blue-600 tracking-[0.2em] mb-4 uppercase flex items-center gap-2 relative z-10">
+              <FiUsers className="text-lg" /> KELOMPOK MUSYLAIL
+            </h2>
+            
+            <label className="flex items-center justify-between cursor-pointer bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 relative z-10 hover:bg-emerald-50 transition-colors mb-4">
+              <div>
+                <span className="block text-[14px] font-extrabold text-emerald-900">Rotasi Otomatis</span>
+                <span className="block text-[10px] text-emerald-700 mt-1">Mengacak pasangan tiap 2 minggu</span>
+              </div>
+              <div className="relative inline-flex items-center">
+                <input 
+                  type="checkbox" 
+                  checked={isAutoRotatePartner}
+                  onChange={(e) => saveGlobalSettings('is_auto_rotate_partner', e.target.checked)}
+                  className="sr-only peer" 
+                />
+                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              </div>
+            </label>
+
+            {isAutoRotatePartner ? (
+              <div className="relative z-10 bg-gray-50/80 border border-gray-100 rounded-2xl p-4">
+                <p className="text-xs text-gray-500 mb-3 font-medium flex items-center gap-2">
+                  <FiRefreshCw className="text-blue-500 animate-spin-slow" /> Sedang mode otomatis. Ini pasangan minggu ini:
+                </p>
+                <div className="space-y-2 h-48 overflow-y-auto custom-scrollbar pr-2">
+                  {currentActiveGroups.map((g, idx) => (
+                    <div key={idx} className="text-[11px] font-bold text-gray-700 bg-white p-2 rounded-lg border border-gray-100">
+                      Kelompok {idx + 1}: {g[0]} &amp; {g[1]}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="relative z-10">
+                <p className="text-xs text-red-500 mb-3 font-bold">
+                  Mode manual aktif. Abang bebas meracik pasangan kelompok di bawah ini:
+                </p>
+                <div className="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-2 mb-4">
+                  {manualGroups.map((group, gIdx) => (
+                    <div key={gIdx} className="bg-blue-50/30 p-3 rounded-xl border border-blue-100">
+                      <div className="text-[10px] font-black text-blue-700 uppercase mb-2">Kelompok {gIdx + 1}</div>
+                      <div className="space-y-2">
+                        <select 
+                          className="w-full bg-white border border-gray-200 text-xs p-2 rounded-lg font-bold text-gray-700"
+                          value={group[0]}
+                          onChange={(e) => handleGroupChange(gIdx, 0, e.target.value)}
+                        >
+                          {SEMUA_BAPAK.map(b => <option key={b} value={b}>{b}</option>)}
+                        </select>
+                        <select 
+                          className="w-full bg-white border border-gray-200 text-xs p-2 rounded-lg font-bold text-gray-700"
+                          value={group[1]}
+                          onChange={(e) => handleGroupChange(gIdx, 1, e.target.value)}
+                        >
+                          {SEMUA_BAPAK.map(b => <option key={b} value={b}>{b}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button 
+                  onClick={saveManualGroups}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-extrabold rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
+                >
+                  <FiSave /> Simpan Formasi Kelompok
+                </button>
+              </div>
+            )}
           </section>
 
           {/* Daily Override */}
