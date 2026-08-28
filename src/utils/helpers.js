@@ -1,4 +1,19 @@
-import { INDO_DAYS, INDO_MONTHS, TIM_ALBAQOROH_1, TIM_ALBAQOROH_2, SHIFT_MUSYLAIL, SEMUA_BAPAK } from './constants';
+import { INDO_DAYS, INDO_MONTHS, TIM_ALBAQOROH_1, TIM_ALBAQOROH_2, SHIFT_MUSYLAIL } from './constants';
+
+const FALLBACK_BAPAK = [
+  "Bpk. Adin Muhamad Mufid",
+  "Bpk. Mohamad Khasan Bisri",
+  "Bpk. Abdillah Khoironi",
+  "Bpk. Muhammad Ricky Gunawan Pratama",
+  "Bpk. M Khoirul Anwar",
+  "Bpk. Muchammad Haqqinnazili",
+  "Bpk. Choerul Anam",
+  "Bpk. Muhammad Burhanuddin Ramadhan",
+  "Bpk. Ahmad Syarief Qornel",
+  "Bpk. Muhammad Hadi Mafatih",
+  "Bpk. Abdul Wakhid",
+  "Bpk. Agus Wahyudin"
+];
 
 export const formatDateIndo = (date) => {
   if (!date) return "";
@@ -90,7 +105,7 @@ export const getMusylailGroups = (settings, targetDate) => {
   const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
   const periodsPassed = Math.floor(diffWeeks / 2); // Acak setiap 2 minggu
   
-  const rawDaftar = settings?.daftar_mustahiq || SEMUA_BAPAK;
+  const rawDaftar = settings?.daftar_mustahiq || FALLBACK_BAPAK;
   
   const KATEGORI_MUSTAHIQ_LEGACY = {
     "Bpk. Abdillah Khoironi": "A",

@@ -124,7 +124,7 @@ export default function AdminPage() {
 
   const fetchDailyOverride = async () => {
     const dateStr = selectedDate.toISOString().split('T')[0];
-    const { data } = await supabase.from('jadwal_musylail').select('*').eq('tanggal', dateStr).single();
+    const { data } = await supabase.from('jadwal_musylail').select('*').eq('tanggal', dateStr).maybeSingle();
     
     if (data) {
       setManualPetugas(data.petugas || []);
