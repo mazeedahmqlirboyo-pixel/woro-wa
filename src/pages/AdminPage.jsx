@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiHome, FiSettings, FiCalendar, FiCheckSquare, FiInfo, FiTrash2, FiSave, FiUsers, FiRefreshCw, FiChevronDown, FiPlus, FiX } from 'react-icons/fi';
 import { supabase } from '../supabaseClient';
 import { LABEL_MALAM, SEMUA_BAPAK } from '../utils/constants';
-import { formatDateIndo, getMusylailGroups } from '../utils/helpers';
+import { formatDateIndo, getMusylailGroups, getDaysUntilNextRotation } from '../utils/helpers';
 import logoWoro from '../assets/512.png.png';
 
 const GlassDropdown = ({ value, options, onChange }) => {
@@ -356,8 +356,11 @@ export default function AdminPage() {
 
             {isAutoRotatePartner ? (
               <div className="relative z-10 bg-gray-50/80 border border-gray-100 rounded-2xl p-4">
-                <p className="text-xs text-gray-500 mb-3 font-medium flex items-center gap-2">
-                  <FiRefreshCw className="text-blue-500 animate-spin-slow" /> Sedang mode otomatis. Ini pasangan minggu ini:
+                <p className="text-xs text-gray-500 mb-3 font-medium flex flex-col gap-1">
+                  <span className="flex items-center gap-2"><FiRefreshCw className="text-blue-500 animate-spin-slow" /> Sedang mode otomatis. Ini pasangan minggu ini:</span>
+                  <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded w-fit border border-gray-200">
+                    Sisa <b>{getDaysUntilNextRotation(new Date())} hari</b> sebelum rotasi berikutnya
+                  </span>
                 </p>
                 <div className="space-y-2 max-h-56 overflow-y-auto custom-scrollbar pr-2">
                   {currentActiveGroups.map((g, idx) => (

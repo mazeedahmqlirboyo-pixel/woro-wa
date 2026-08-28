@@ -169,4 +169,20 @@ export const getMusylailGroups = (settings, targetDate) => {
   return dynamicGroups;
 };
 
+export const getDaysUntilNextRotation = (targetDate) => {
+  const anchorDate = new Date(2026, 7, 29);
+  anchorDate.setHours(0,0,0,0);
+  
+  const target = new Date(targetDate || new Date());
+  target.setHours(0,0,0,0);
+  
+  let diffTime = target - anchorDate;
+  if (diffTime < 0) return 14; 
+  
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const daysPassedInCycle = diffDays % 14;
+  
+  return 14 - daysPassedInCycle;
+};
+
 
