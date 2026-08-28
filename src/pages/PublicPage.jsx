@@ -276,8 +276,8 @@ export default function PublicPage() {
     <button
       onClick={() => setActiveTab(id)}
       className={`px-2 py-3 font-bold text-[12px] sm:text-[13px] flex-1 whitespace-nowrap transition-all duration-300 rounded-[1rem] ${activeTab === id
-        ? 'bg-white text-indigo-700 shadow-[0_2px_10px_rgb(0,0,0,0.06)]'
-        : 'text-gray-500 hover:text-indigo-600 hover:bg-white/50'
+        ? 'bg-white text-blue-700 shadow-[0_2px_10px_rgb(0,0,0,0.06)]'
+        : 'text-gray-500 hover:text-blue-600 hover:bg-white/50'
         }`}
     >
       {label}
@@ -321,11 +321,11 @@ export default function PublicPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-100 via-white to-purple-100 flex flex-col items-center pb-8 font-sans selection:bg-indigo-200 selection:text-indigo-900">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-100 via-white to-sky-100 flex flex-col items-center pb-8 font-sans selection:bg-blue-200 selection:text-blue-900">
       
       {/* Admin Link at the very top */}
       <div className="w-full max-w-md flex justify-end px-4 py-2 relative z-[60]">
-        <a href="/admin" className="text-xs bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-700 px-3 py-1.5 rounded-full font-bold transition backdrop-blur-md border border-indigo-200">
+        <a href="/admin" className="text-xs bg-blue-600/10 hover:bg-blue-600/20 text-blue-700 px-3 py-1.5 rounded-full font-bold transition backdrop-blur-md border border-blue-200">
           ⚙️ Panel Admin
         </a>
       </div>
@@ -343,7 +343,7 @@ export default function PublicPage() {
       {/* PWA INSTALL BANNER */}
       {showInstallBanner && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-[90] animate-in fade-in slide-in-from-bottom-5 duration-500">
-          <div className="bg-white/95 backdrop-blur-md border border-indigo-100 p-5 rounded-[2rem] shadow-2xl flex flex-col gap-4">
+          <div className="bg-white/95 backdrop-blur-md border border-blue-100 p-5 rounded-[2rem] shadow-2xl flex flex-col gap-4">
             <div className="flex gap-4 items-start">
               <div className="flex-1">
                 <h3 className="font-extrabold text-[15px] text-gray-950 leading-tight">Pasang Aplikasi WORO MAZEEDA</h3>
@@ -357,14 +357,14 @@ export default function PublicPage() {
             </div>
 
             {isIOSDevice ? (
-              <div className="bg-indigo-50/50 rounded-2xl p-3.5 border border-indigo-100/50 text-[12px] text-indigo-950 font-medium space-y-2">
-                <p className="font-bold text-indigo-900">Instruksi Safari iOS:</p>
+              <div className="bg-blue-50/50 rounded-2xl p-3.5 border border-blue-100/50 text-[12px] text-blue-950 font-medium space-y-2">
+                <p className="font-bold text-blue-900">Instruksi Safari iOS:</p>
                 <div className="flex gap-2 items-center">
-                  <span className="bg-indigo-600 text-white font-extrabold w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0">1</span>
+                  <span className="bg-blue-600 text-white font-extrabold w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0">1</span>
                   <span>Ketuk tombol Bagikan (Share) (ikon kotak dengan panah atas di bar bawah browser Safari).</span>
                 </div>
                 <div className="flex gap-2 items-center">
-                  <span className="bg-indigo-600 text-white font-extrabold w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0">2</span>
+                  <span className="bg-blue-600 text-white font-extrabold w-5 h-5 rounded-full flex items-center justify-center text-[10px] shrink-0">2</span>
                   <span>Pilih Tambahkan ke Layar Utama (Add to Home Screen).</span>
                 </div>
               </div>
@@ -380,7 +380,7 @@ export default function PublicPage() {
               {!isIOSDevice && deferredPrompt && (
                 <button 
                   onClick={handleInstallClick}
-                  className="flex-1 py-3 text-xs font-extrabold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]"
+                  className="flex-1 py-3 text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
                 >
                   Pasang Sekarang
                 </button>
@@ -388,7 +388,7 @@ export default function PublicPage() {
               {isIOSDevice && (
                 <button 
                   onClick={handleDismissBanner}
-                  className="flex-1 py-3 text-xs font-extrabold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg shadow-indigo-200 transition-all active:scale-[0.98]"
+                  className="flex-1 py-3 text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98]"
                 >
                   Mengerti
                 </button>
@@ -403,12 +403,12 @@ export default function PublicPage() {
         {/* Header - Sticky */}
         <header id="header" className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-white/50">
           <div className="flex items-center gap-4 px-6 pt-6 pb-5">
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-3 rounded-2xl shadow-lg shadow-indigo-200">
+            <div className="bg-gradient-to-br from-blue-500 to-sky-600 p-3 rounded-2xl shadow-lg shadow-blue-200">
               <FiCalendar className="text-2xl text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-indigo-800 to-purple-800 leading-tight">Pengumuman</h1>
-              <p className="text-xs text-indigo-500/80 font-bold tracking-[0.2em] uppercase mt-0.5">PP. ALBAQOROH</p>
+              <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-800 to-sky-800 leading-tight">Pengumuman</h1>
+              <p className="text-xs text-blue-500/80 font-bold tracking-[0.2em] uppercase mt-0.5">PP. ALBAQOROH</p>
             </div>
           </div>
 
@@ -427,26 +427,26 @@ export default function PublicPage() {
           {/* VIEW: JAGA MUSYLAIL */}
           {activeTab === 'musylail' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <section className="bg-gradient-to-br from-indigo-50 to-white border border-indigo-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <h2 className="text-xs font-black text-center text-indigo-400 tracking-[0.2em] mb-3 uppercase relative z-10">Piket Malam Musylail</h2>
+              <section className="bg-gradient-to-br from-blue-50 to-white border border-blue-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
+                <h2 className="text-xs font-black text-center text-blue-400 tracking-[0.2em] mb-3 uppercase relative z-10">Piket Malam Musylail</h2>
                 
                 {/* Navigasi Tanggal */}
-                <div className="flex items-center justify-between gap-2 mb-4 bg-indigo-950/5 p-2 rounded-2xl relative z-10">
+                <div className="flex items-center justify-between gap-2 mb-4 bg-blue-950/5 p-2 rounded-2xl relative z-10">
                   <button
                     onClick={() => {
                       const prev = new Date(selectedDateMusylail);
                       prev.setDate(prev.getDate() - 1);
                       setSelectedDateMusylail(prev);
                     }}
-                    className="p-2 bg-white hover:bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
+                    className="p-2 bg-white hover:bg-blue-50 border border-blue-100 text-blue-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 19l-7-7 7-7" /></svg>
                   </button>
 
                   <div className="text-center flex-1">
-                    <div className="text-xs font-extrabold text-indigo-500 uppercase tracking-wider">{malamIni || 'Tidak Ada Piket'}</div>
-                    <div className="text-[14px] font-black text-indigo-950 mt-0.5">{formatDateIndo(selectedDateMusylail)}</div>
+                    <div className="text-xs font-extrabold text-blue-500 uppercase tracking-wider">{malamIni || 'Tidak Ada Piket'}</div>
+                    <div className="text-[14px] font-black text-blue-950 mt-0.5">{formatDateIndo(selectedDateMusylail)}</div>
                   </div>
 
                   <button
@@ -455,7 +455,7 @@ export default function PublicPage() {
                       next.setDate(next.getDate() + 1);
                       setSelectedDateMusylail(next);
                     }}
-                    className="p-2 bg-white hover:bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
+                    className="p-2 bg-white hover:bg-blue-50 border border-blue-100 text-blue-600 rounded-xl transition-all shadow-sm active:scale-95 animate-none"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
                   </button>
@@ -465,7 +465,7 @@ export default function PublicPage() {
                   <div className="flex justify-center mb-4 relative z-10 animate-in fade-in slide-in-from-top-1 duration-200">
                     <button
                       onClick={() => setSelectedDateMusylail(new Date())}
-                      className="px-3 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-md shadow-indigo-200 active:scale-95 transition-all flex items-center gap-1.5"
+                      className="px-3 py-1.5 text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white rounded-full shadow-md shadow-blue-200 active:scale-95 transition-all flex items-center gap-1.5"
                     >
                       <FiRefreshCw className="text-[10px]" /> Kembali ke Hari Ini
                     </button>
@@ -474,20 +474,20 @@ export default function PublicPage() {
 
                 {petugasMalamIni.length > 0 ? (
                   <div className="space-y-3 relative z-10">
-                    <label className="flex items-center gap-4 cursor-pointer bg-indigo-600/5 px-5 py-3 rounded-2xl hover:bg-indigo-600/10 transition-colors">
+                    <label className="flex items-center gap-4 cursor-pointer bg-blue-600/5 px-5 py-3 rounded-2xl hover:bg-blue-600/10 transition-colors">
                       <div className="relative flex items-center">
                         <input
                           type="checkbox"
                           checked={selectedPetugas.length > 0 && selectedPetugas.length === petugasMalamIni.length}
                           onChange={(e) => setSelectedPetugas(e.target.checked ? petugasMalamIni : [])}
-                          className="peer w-6 h-6 appearance-none rounded-lg border-2 border-indigo-200 checked:bg-indigo-600 checked:border-indigo-600 transition-all cursor-pointer"
+                          className="peer w-6 h-6 appearance-none rounded-lg border-2 border-blue-200 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer"
                         />
                         <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                       </div>
-                      <span className="font-extrabold text-[15px] text-indigo-900">Pilih Semua Bapak</span>
+                      <span className="font-extrabold text-[15px] text-blue-900">Pilih Semua Bapak</span>
                     </label>
                     {petugasMalamIni.map((petugas, idx) => (
-                      <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-indigo-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-indigo-200 transition-all">
+                      <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-blue-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-blue-200 transition-all">
                         <div className="relative flex items-center">
                           <input
                             type="checkbox"
@@ -496,16 +496,16 @@ export default function PublicPage() {
                               if (selectedPetugas.includes(petugas)) setSelectedPetugas(selectedPetugas.filter(p => p !== petugas));
                               else setSelectedPetugas([...selectedPetugas, petugas]);
                             }}
-                            className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-indigo-500 checked:border-indigo-500 transition-all cursor-pointer"
+                            className="peer w-6 h-6 appearance-none rounded-lg border-2 border-gray-200 checked:bg-blue-500 checked:border-blue-500 transition-all cursor-pointer"
                           />
                           <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                         </div>
-                        <span className="group-hover:text-indigo-900 transition-colors">{petugas}</span>
+                        <span className="group-hover:text-blue-900 transition-colors">{petugas}</span>
                       </label>
                     ))}
                   </div>
                 ) : (
-                  <div className="bg-white/80 backdrop-blur-sm px-6 py-5 rounded-2xl font-bold text-indigo-400 border border-indigo-100/50 text-center shadow-sm relative z-10">
+                  <div className="bg-white/80 backdrop-blur-sm px-6 py-5 rounded-2xl font-bold text-blue-400 border border-blue-100/50 text-center shadow-sm relative z-10">
                     ✨ Tidak ada jadwal piket malam ini
                   </div>
                 )}
@@ -514,7 +514,7 @@ export default function PublicPage() {
               <section>
                 <button
                   onClick={handleGenerateMusylail}
-                  className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-indigo-200 flex justify-center items-center gap-3 transition-all"
+                  className="w-full py-4 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-blue-200 flex justify-center items-center gap-3 transition-all"
                 >
                   <FiRefreshCw className={`text-xl ${messageMusylail ? "" : "animate-spin-slow"}`} />
                   Generate Pesan Musylail
@@ -522,13 +522,13 @@ export default function PublicPage() {
               </section>
 
               <section className="space-y-3">
-                <h2 className="text-sm font-bold text-indigo-900/60 flex items-center gap-2 uppercase tracking-wider pl-1">
+                <h2 className="text-sm font-bold text-blue-900/60 flex items-center gap-2 uppercase tracking-wider pl-1">
                   <FiEdit3 className="text-lg" /> Preview & Edit
                 </h2>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-200 to-purple-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-200 to-sky-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                   <textarea
-                    className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
+                    className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-blue-100 focus:border-blue-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
                     placeholder="Pesan akan muncul di sini..."
                     value={messageMusylail}
                     onChange={(e) => setMessageMusylail(e.target.value)}
@@ -554,7 +554,7 @@ export default function PublicPage() {
               <section className="bg-white border border-gray-100 rounded-3xl p-5 shadow-sm space-y-4 animate-in">
                 <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                   <h3 className="text-sm font-black text-gray-800 flex items-center gap-2">
-                    <FiCalendar className="text-indigo-600" />
+                    <FiCalendar className="text-blue-600" />
                     Jadwal Terstruktur
                   </h3>
                 </div>
@@ -572,12 +572,12 @@ export default function PublicPage() {
                         }}
                         className={`w-full flex items-center justify-between p-3.5 rounded-2xl border transition-all text-left ${
                           isSelected
-                            ? 'bg-indigo-50/70 border-indigo-200 shadow-sm scale-[0.99]'
+                            ? 'bg-blue-50/70 border-blue-200 shadow-sm scale-[0.99]'
                             : 'bg-white hover:bg-gray-50 border-gray-100'
                         }`}
                       >
                         <div className="flex flex-col gap-0.5">
-                          <span className={`text-[10px] font-bold ${isSelected ? 'text-indigo-600' : 'text-gray-400'}`}>
+                          <span className={`text-[10px] font-bold ${isSelected ? 'text-blue-600' : 'text-gray-400'}`}>
                             {formatDateIndo(day.date).split(',')[0]}, {day.date.getDate()} {INDO_MONTHS[day.date.getMonth()]}
                           </span>
                           <span className="text-[14px] font-black text-gray-805">
@@ -593,7 +593,7 @@ export default function PublicPage() {
                           ) : (
                             <div className="flex flex-col gap-0.5 items-end">
                               {day.petugas.map((p, pIdx) => (
-                                <span key={pIdx} className="text-xs font-bold text-indigo-950">
+                                <span key={pIdx} className="text-xs font-bold text-blue-950">
                                   {p}
                                 </span>
                               ))}
