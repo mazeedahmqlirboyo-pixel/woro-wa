@@ -90,7 +90,29 @@ export const getMusylailGroups = (settings, targetDate) => {
   const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
   const periodsPassed = Math.floor(diffWeeks / 2); // Acak setiap 2 minggu
   
-  const daftarMustahiq = settings?.daftar_mustahiq || SEMUA_BAPAK;
+  const rawDaftar = settings?.daftar_mustahiq || SEMUA_BAPAK;
+  
+  const KATEGORI_MUSTAHIQ_LEGACY = {
+    "Bpk. Abdillah Khoironi": "A",
+    "Bpk. M Khoirul Anwar": "A", 
+    "Bpk. Abdul Wakhid": "A",
+    "Bpk. Adin Muhamad Mufid": "B",
+    "Bpk. Agus Wahyudin": "B",
+    "Bpk. Muhammad Burhanuddin Ramadhan": "B",
+    "Bpk. Mohamad Khasan Bisri": "C",
+    "Bpk. Muhammad Hadi Mafatih": "C",
+    "Bpk. Choerul Anam": "C", 
+    "Bpk. Muhammad Ricky Gunawan Pratama": "D",
+    "Bpk. Muchammad Haqqinnazili": "D",
+    "Bpk. Ahmad Syarief Qornel": "D",
+  };
+
+  const daftarMustahiq = rawDaftar.map(item => {
+    if (typeof item === 'string') {
+      return { nama: item, kategori: KATEGORI_MUSTAHIQ_LEGACY[item] || "Umum" };
+    }
+    return item;
+  });
   
   const mulberry32 = (a) => {
     return function() {
@@ -111,27 +133,10 @@ export const getMusylailGroups = (settings, targetDate) => {
     return shuffled;
   };
 
-  // Kategori sesuai request (A tidak boleh dengan A, B tidak dengan B, dll)
-  const KATEGORI_MUSTAHIQ = {
-    "Bpk. Abdillah Khoironi": "A",
-    "Bpk. M Khoirul Anwar": "A", 
-    "Bpk. Abdul Wakhid": "A",
-    "Bpk. Adin Muhamad Mufid": "B",
-    "Bpk. Agus Wahyudin": "B",
-    "Bpk. Muhammad Burhanuddin Ramadhan": "B",
-    "Bpk. Mohamad Khasan Bisri": "C",
-    "Bpk. Muhammad Hadi Mafatih": "C",
-    "Bpk. Choerul Anam": "C", 
-    "Bpk. Muhammad Ricky Gunawan Pratama": "D",
-    "Bpk. Muchammad Haqqinnazili": "D",
-    "Bpk. Ahmad Syarief Qornel": "D",
-  };
-
   let validGroupsFound = false;
   let attempt = 0;
   let dynamicGroups = [];
 
-  // Looping untuk mencari acakan yang valid (tidak ada kategori yang sama dalam 1 grup)
   while (!validGroupsFound && attempt < 100) {
     const currentSeed = periodsPassed + 54321 + attempt;
     const shuffledList = seededShuffle(daftarMustahiq, currentSeed);
@@ -141,18 +146,17 @@ export const getMusylailGroups = (settings, targetDate) => {
 
     for (let i = 0; i < shuffledList.length; i += 2) {
       const p1 = shuffledList[i];
-      const p2 = i + 1 < shuffledList.length ? shuffledList[i + 1] : "Kosong";
+      const p2 = i + 1 < shuffledList.length ? shuffledList[i + 1] : { nama: "Kosong", kategori: "Kosong" };
       
-      const kat1 = KATEGORI_MUSTAHIQ[p1] || p1; // Jika tidak ada di map, jadikan nama sbg kategori unik
-      const kat2 = KATEGORI_MUSTAHIQ[p2] || p2; 
+      const kat1 = p1.kategori; 
+      const kat2 = p2.kategori; 
 
-      // Jika p2 bukan "Kosong" dan kategorinya sama, maka acakan ini tidak sah
-      if (p2 !== "Kosong" && kat1 === kat2) {
+      if (p2.nama !== "Kosong" && kat1 === kat2) {
         isValid = false;
         break;
       }
       
-      dynamicGroups.push([p1, p2]);
+      dynamicGroups.push([p1.nama, p2.nama]);
     }
 
     if (isValid) {

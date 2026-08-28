@@ -48,14 +48,27 @@ const GlassDropdown = ({ value, options, onChange }) => {
 export default function AdminPage() {
   const [globalSettings, setGlobalSettings] = useState(null);
   
+  const KATEGORI_MUSTAHIQ_LEGACY = {
+    "Bpk. Abdillah Khoironi": "A", "Bpk. M Khoirul Anwar": "A", "Bpk. Abdul Wakhid": "A",
+    "Bpk. Adin Muhamad Mufid": "B", "Bpk. Agus Wahyudin": "B", "Bpk. Muhammad Burhanuddin Ramadhan": "B",
+    "Bpk. Mohamad Khasan Bisri": "C", "Bpk. Muhammad Hadi Mafatih": "C", "Bpk. Choerul Anam": "C", 
+    "Bpk. Muhammad Ricky Gunawan Pratama": "D", "Bpk. Muchammad Haqqinnazili": "D", "Bpk. Ahmad Syarief Qornel": "D",
+  };
+
+  const migrateDaftar = (raw) => raw.map(item => {
+    if (typeof item === 'string') return { nama: item, kategori: KATEGORI_MUSTAHIQ_LEGACY[item] || "Umum" };
+    return item;
+  });
+
   // Settings States
   const [isAutoRotatePartner, setIsAutoRotatePartner] = useState(true);
   const [hariAktif, setHariAktif] = useState([0, 1, 2, 3, 6]);
-  const [daftarMustahiq, setDaftarMustahiq] = useState(SEMUA_BAPAK);
+  const [daftarMustahiq, setDaftarMustahiq] = useState(() => migrateDaftar(SEMUA_BAPAK));
   const [manualGroups, setManualGroups] = useState([]);
 
   // Mustahiq Management States
   const [newMustahiq, setNewMustahiq] = useState('');
+  const [newKategori, setNewKategori] = useState('A');
 
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   
@@ -102,7 +115,9 @@ export default function AdminPage() {
         setHariAktif([0, 1, 2, 3, 5, 6]);
       }
       
-      if (data.daftar_mustahiq) setDaftarMustahiq(data.daftar_mustahiq);
+      if (data.daftar_mustahiq) {
+        setDaftarMustahiq(migrateDaftar(data.daftar_mustahiq));
+      }
       if (data.manual_groups) setManualGroups(data.manual_groups);
     }
   };
@@ -141,7 +156,7 @@ export default function AdminPage() {
 
   const addMustahiq = () => {
     if (!newMustahiq.trim()) return;
-    const newList = [...daftarMustahiq, newMustahiq.trim()];
+    const newList = [...daftarMustahiq, { nama: newMustahiq.trim(), kategori: newKategori }];
     setDaftarMustahiq(newList);
     setNewMustahiq('');
     saveSettingsToDB({ daftar_mustahiq: newList });
@@ -213,7 +228,7 @@ export default function AdminPage() {
     { label: "M. Sabtu", val: 6 },
   ];
 
-  const MUSTAHIQ_OPTIONS = ["Kosong", ...daftarMustahiq];
+  const MUSTAHIQ_OPTIONS = ["Kosong", ...daftarMustahiq.map(m => m.nama)];
 
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center pb-8 font-sans selection:bg-blue-200 selection:text-blue-900">
@@ -275,6 +290,16 @@ export default function AdminPage() {
               <div className="pt-2 border-t border-blue-50">
                 <p className="text-xs font-bold text-gray-700 mb-3">Daftar Mustahiq ({daftarMustahiq.length} Orang):</p>
                 <div className="flex gap-2 mb-3">
+                  <select 
+                    value={newKategori}
+                    onChange={e => setNewKategori(e.target.value)}
+                    className="bg-gray-50 border border-gray-200 text-xs px-2 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 font-bold text-blue-700"
+                  >
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                  </select>
                   <input 
                     type="text" 
                     value={newMustahiq}
@@ -286,10 +311,13 @@ export default function AdminPage() {
                     <FiPlus />
                   </button>
                 </div>
-                <div className="space-y-1.5 max-h-40 overflow-y-auto custom-scrollbar pr-1">
+                <div className="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar pr-1">
                   {daftarMustahiq.map((m, idx) => (
                     <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 p-2 rounded-lg text-[11px] font-bold text-gray-700 shadow-sm">
-                      <span>{idx + 1}. {m}</span>
+                      <span className="flex items-center gap-2">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[9px] font-black tracking-wider">BAGIAN {m.kategori}</span>
+                        <span>{idx + 1}. {m.nama}</span>
+                      </span>
                       <button onClick={() => removeMustahiq(idx)} className="text-red-400 hover:text-red-600 p-1">
                         <FiTrash2 />
                       </button>
@@ -431,18 +459,20 @@ export default function AdminPage() {
 
               {!isLibur && (
                 <div className="space-y-2 h-64 overflow-y-auto pr-2 custom-scrollbar bg-gray-50/50 p-2 rounded-2xl border border-gray-100">
-                  {daftarMustahiq.map(bapak => (
-                    <label key={bapak} className="group flex items-center gap-4 bg-white px-4 py-3.5 rounded-xl font-bold text-gray-700 shadow-sm border border-blue-50/50 text-[14px] cursor-pointer hover:shadow-md hover:border-blue-200 transition-all">
+                  {daftarMustahiq.map(m => (
+                    <label key={m.nama} className="group flex items-center gap-4 bg-white px-4 py-3.5 rounded-xl font-bold text-gray-700 shadow-sm border border-blue-50/50 text-[14px] cursor-pointer hover:shadow-md hover:border-blue-200 transition-all">
                       <div className="relative flex items-center">
                         <input
                           type="checkbox"
-                          checked={manualPetugas.includes(bapak)}
-                          onChange={() => togglePetugas(bapak)}
+                          checked={manualPetugas.includes(m.nama)}
+                          onChange={() => togglePetugas(m.nama)}
                           className="peer w-5 h-5 appearance-none rounded-lg border-2 border-gray-200 checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer"
                         />
                         <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-3 h-3" />
                       </div>
-                      <span className="group-hover:text-blue-900 transition-colors">{bapak}</span>
+                      <span className="group-hover:text-blue-900 transition-colors flex items-center gap-2">
+                        {m.nama} <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded border border-gray-200">{m.kategori}</span>
+                      </span>
                     </label>
                   ))}
                 </div>

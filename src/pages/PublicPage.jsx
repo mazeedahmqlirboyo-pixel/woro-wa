@@ -252,6 +252,12 @@ export default function PublicPage() {
     setMessageHmq(generated);
   };
 
+  const handleToggleKehadiranMqb = (id, field) => {
+    setKehadiranMqb(prev => ({ ...prev, [id]: { ...prev[id], [field]: !prev[id]?.[field] } }));
+  };
+
+  const parsedDaftar = globalSettings?.daftar_mustahiq ? globalSettings.daftar_mustahiq.map(m => typeof m === 'string' ? m : m.nama) : SEMUA_BAPAK;
+
   // === HANDLER AL-BAQOROH ===
   const handleGenerateAlbaqoroh = () => {
     if (selectedAlbaqoroh.length === 0) {
@@ -744,15 +750,15 @@ export default function PublicPage() {
                     <div className="relative flex items-center">
                       <input
                         type="checkbox"
-                        checked={selectedHmq.length === SEMUA_BAPAK.length}
-                        onChange={(e) => setSelectedHmq(e.target.checked ? SEMUA_BAPAK : [])}
+                        checked={selectedHmq.length === parsedDaftar.length}
+                        onChange={(e) => setSelectedHmq(e.target.checked ? parsedDaftar : [])}
                         className="peer w-6 h-6 appearance-none rounded-lg border-2 border-blue-200 checked:bg-blue-500 checked:border-blue-500 transition-all cursor-pointer"
                       />
                       <FiCheckSquare className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none w-4 h-4" />
                     </div>
                     <span className="font-extrabold text-[15px] text-blue-900">Pilih Semua Bapak</span>
                   </label>
-                  {SEMUA_BAPAK.map((petugas, idx) => (
+                  {parsedDaftar.map((petugas, idx) => (
                     <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-blue-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-blue-200 transition-all">
                       <div className="relative flex items-center">
                         <input
@@ -838,7 +844,7 @@ export default function PublicPage() {
                     </div>
                     <span className="font-extrabold text-[15px] text-blue-900">Pilih Anggota {timAktifAlbaqorohLabel} (Otomatis)</span>
                   </label>
-                  {SEMUA_BAPAK.map((petugas, idx) => (
+                  {parsedDaftar.map((petugas, idx) => (
                     <label key={idx} className="group flex items-center gap-4 bg-white px-5 py-4 rounded-2xl font-bold text-gray-700 shadow-sm border border-blue-50/50 text-[15px] cursor-pointer hover:shadow-md hover:border-blue-200 transition-all">
                       <div className="relative flex items-center">
                         <input
