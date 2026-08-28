@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy, FiInfo, FiLock, FiMoon, FiSun, FiBook, FiUsers } from 'react-icons/fi';
 import logoWoro from '../assets/512.png.png';
 import { supabase } from '../supabaseClient';
@@ -420,9 +421,9 @@ export default function PublicPage() {
             </div>
             
             {/* Disguised Admin Link */}
-            <a href="/admin" className="p-2 text-blue-800/5 hover:text-blue-800/30 transition-colors" title="Admin Panel">
+            <Link to="/admin" className="p-2 text-blue-800/5 hover:text-blue-800/30 transition-colors" title="Admin Panel">
               <FiLock className="w-4 h-4" />
-            </a>
+            </Link>
           </div>
 
         </header>

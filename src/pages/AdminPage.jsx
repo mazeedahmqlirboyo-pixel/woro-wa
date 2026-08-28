@@ -1,17 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import { FiHome, FiSettings, FiCalendar, FiCheckSquare, FiInfo, FiTrash2, FiSave, FiUsers, FiRefreshCw, FiChevronDown } from 'react-icons/fi';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { FiHome, FiSettings, FiCalendar, FiCheckSquare, FiInfo, FiTrash2, FiSave, FiUsers, FiRefreshCw, FiChevronDown, FiPlus, FiX } from 'react-icons/fi';
 import { supabase } from '../supabaseClient';
-import { SEMUA_BAPAK, LABEL_MALAM, SHIFT_MUSYLAIL } from '../utils/constants';
+import { LABEL_MALAM, SEMUA_BAPAK } from '../utils/constants';
 import { formatDateIndo, getMusylailGroups } from '../utils/helpers';
 import logoWoro from '../assets/512.png.png';
 
+const GlassDropdown = ({ value, options, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) setIsOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button 
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between bg-white border border-blue-200/60 text-[11px] px-4 py-3 rounded-xl font-extrabold text-blue-900 shadow-sm hover:border-blue-300 transition-all focus:outline-none focus:ring-4 focus:ring-blue-500/20"
+      >
+        <span className="truncate pr-2">{value}</span>
+        <FiChevronDown className={`w-4 h-4 text-blue-400 flex-shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <div className={`absolute z-50 mt-2 w-full bg-white/80 backdrop-blur-2xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-xl py-2 max-h-48 overflow-y-auto custom-scrollbar transition-all duration-300 origin-top ${isOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'}`}>
+        {options.map((opt) => (
+          <button
+            key={opt}
+            type="button"
+            onClick={() => { onChange(opt); setIsOpen(false); }}
+            className={`w-full text-left px-4 py-2.5 text-[11px] font-bold transition-colors ${value === opt ? 'bg-blue-50/80 text-blue-700' : 'text-gray-700 hover:bg-blue-50/50 hover:text-blue-600'}`}
+          >
+            {opt}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export default function AdminPage() {
   const [globalSettings, setGlobalSettings] = useState(null);
-  const [isMalamSabtuActive, setIsMalamSabtuActive] = useState(false);
-  const [isAutoRotatePartner, setIsAutoRotatePartner] = useState(true);
   
-  // For manual group override
-  const [manualGroups, setManualGroups] = useState(SHIFT_MUSYLAIL);
+  // Settings States
+  const [isAutoRotatePartner, setIsAutoRotatePartner] = useState(true);
+  const [hariAktif, setHariAktif] = useState([0, 1, 2, 3, 6]);
+  const [daftarMustahiq, setDaftarMustahiq] = useState(SEMUA_BAPAK);
+  const [manualGroups, setManualGroups] = useState([]);
+
+  // Mustahiq Management States
+  const [newMustahiq, setNewMustahiq] = useState('');
 
   const [selectedDate, setSelectedDate] = useState(() => new Date());
   
@@ -34,15 +78,32 @@ export default function AdminPage() {
     fetchDailyOverride();
   }, [selectedDate]);
 
+  // Adjust manualGroups array size if daftarMustahiq length changes
+  useEffect(() => {
+    const numGroups = Math.ceil(daftarMustahiq.length / 2);
+    if (manualGroups.length !== numGroups) {
+      const newGroups = [];
+      for(let i=0; i<numGroups; i++) {
+        newGroups.push(manualGroups[i] || ["Kosong", "Kosong"]);
+      }
+      setManualGroups(newGroups);
+    }
+  }, [daftarMustahiq.length]);
+
   const fetchGlobalSettings = async () => {
     const { data } = await supabase.from('settings').select('*').eq('id', 'global').single();
     if (data) {
       setGlobalSettings(data);
-      setIsMalamSabtuActive(data.is_malam_sabtu_active ?? false);
       setIsAutoRotatePartner(data.is_auto_rotate_partner ?? true);
-      if (data.manual_groups) {
-        setManualGroups(data.manual_groups);
+      
+      if (data.hari_aktif_musylail) {
+        setHariAktif(data.hari_aktif_musylail);
+      } else if (data.is_malam_sabtu_active) {
+        setHariAktif([0, 1, 2, 3, 5, 6]);
       }
+      
+      if (data.daftar_mustahiq) setDaftarMustahiq(data.daftar_mustahiq);
+      if (data.manual_groups) setManualGroups(data.manual_groups);
     }
   };
 
@@ -59,23 +120,41 @@ export default function AdminPage() {
     }
   };
 
-  const saveGlobalSettings = async (field, value) => {
-    // Optimistic UI update
-    if (field === 'is_malam_sabtu_active') setIsMalamSabtuActive(value);
-    if (field === 'is_auto_rotate_partner') setIsAutoRotatePartner(value);
-
-    const { error } = await supabase.from('settings').upsert({ id: 'global', [field]: value });
+  const saveSettingsToDB = async (updates) => {
+    const { error } = await supabase.from('settings').upsert({ id: 'global', ...updates });
     if (!error) {
-      showToast('Pengaturan global berhasil disimpan');
+      showToast('Pengaturan berhasil disimpan');
       fetchGlobalSettings();
+    } else {
+      showToast('Gagal menyimpan pengaturan', 'error');
     }
-    else showToast('Gagal menyimpan pengaturan', 'error');
+  };
+
+  const toggleHariAktif = (dayIndex) => {
+    const newHari = hariAktif.includes(dayIndex)
+      ? hariAktif.filter(d => d !== dayIndex)
+      : [...hariAktif, dayIndex].sort();
+    
+    setHariAktif(newHari);
+    saveSettingsToDB({ hari_aktif_musylail: newHari });
+  };
+
+  const addMustahiq = () => {
+    if (!newMustahiq.trim()) return;
+    const newList = [...daftarMustahiq, newMustahiq.trim()];
+    setDaftarMustahiq(newList);
+    setNewMustahiq('');
+    saveSettingsToDB({ daftar_mustahiq: newList });
+  };
+
+  const removeMustahiq = (index) => {
+    const newList = daftarMustahiq.filter((_, i) => i !== index);
+    setDaftarMustahiq(newList);
+    saveSettingsToDB({ daftar_mustahiq: newList });
   };
 
   const saveManualGroups = async () => {
-    const { error } = await supabase.from('settings').upsert({ id: 'global', manual_groups: manualGroups });
-    if (!error) showToast('Susunan pasangan berhasil disimpan');
-    else showToast('Gagal menyimpan pasangan', 'error');
+    await saveSettingsToDB({ manual_groups: manualGroups });
   };
 
   const saveDailyOverride = async () => {
@@ -123,6 +202,18 @@ export default function AdminPage() {
 
   // Get current active groups (for display in auto mode)
   const currentActiveGroups = getMusylailGroups(globalSettings, new Date());
+  
+  const HARI_OPTIONS = [
+    { label: "M. Ahad", val: 0 },
+    { label: "M. Senin", val: 1 },
+    { label: "M. Selasa", val: 2 },
+    { label: "M. Rabu", val: 3 },
+    { label: "M. Kamis", val: 4 },
+    { label: "M. Jumat", val: 5 },
+    { label: "M. Sabtu", val: 6 },
+  ];
+
+  const MUSTAHIQ_OPTIONS = ["Kosong", ...daftarMustahiq];
 
   return (
     <div className="min-h-screen bg-blue-50 flex flex-col items-center pb-8 font-sans selection:bg-blue-200 selection:text-blue-900">
@@ -150,9 +241,9 @@ export default function AdminPage() {
               </div>
             </div>
             
-            <a href="/" className="p-2 text-blue-600 hover:text-blue-800 bg-blue-100 hover:bg-blue-200 rounded-xl transition-colors" title="Kembali ke Beranda">
+            <Link to="/" className="p-2 text-blue-600 hover:text-blue-800 bg-blue-100 hover:bg-blue-200 rounded-xl transition-colors" title="Kembali ke Beranda">
               <FiHome className="w-5 h-5" />
-            </a>
+            </Link>
           </div>
         </header>
 
@@ -165,22 +256,48 @@ export default function AdminPage() {
               <FiSettings className="text-lg" /> PENGATURAN GLOBAL
             </h2>
             
-            <p className="text-xs text-gray-500 mb-4 leading-relaxed relative z-10 font-medium">
-              Jika diaktifkan, piket Malam Sabtu akan masuk ke dalam putaran shift otomatis mingguan. Jika dimatikan, Malam Sabtu dianggap hari libur.
-            </p>
-            
-            <label className="flex items-center justify-between cursor-pointer bg-blue-50/50 p-4 rounded-2xl border border-blue-100 relative z-10 hover:bg-blue-50 transition-colors">
-              <span className="text-[15px] font-extrabold text-blue-900">Aktifkan Malam Sabtu</span>
-              <div className="relative inline-flex items-center">
-                <input 
-                  type="checkbox" 
-                  checked={isMalamSabtuActive}
-                  onChange={(e) => saveGlobalSettings('is_malam_sabtu_active', e.target.checked)}
-                  className="sr-only peer" 
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <div className="relative z-10 space-y-5">
+              <div>
+                <p className="text-xs font-bold text-gray-700 mb-3">Hari Aktif Piket Musylail:</p>
+                <div className="flex flex-wrap gap-2">
+                  {HARI_OPTIONS.map(hari => (
+                    <button
+                      key={hari.val}
+                      onClick={() => toggleHariAktif(hari.val)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${hariAktif.includes(hari.val) ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200' : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-blue-50'}`}
+                    >
+                      {hari.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </label>
+
+              <div className="pt-2 border-t border-blue-50">
+                <p className="text-xs font-bold text-gray-700 mb-3">Daftar Mustahiq ({daftarMustahiq.length} Orang):</p>
+                <div className="flex gap-2 mb-3">
+                  <input 
+                    type="text" 
+                    value={newMustahiq}
+                    onChange={e => setNewMustahiq(e.target.value)}
+                    placeholder="Nama bapak baru..."
+                    className="flex-1 bg-gray-50 border border-gray-200 text-xs px-3 py-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                  />
+                  <button onClick={addMustahiq} className="bg-blue-600 text-white p-2 rounded-xl hover:bg-blue-700 transition-colors">
+                    <FiPlus />
+                  </button>
+                </div>
+                <div className="space-y-1.5 max-h-40 overflow-y-auto custom-scrollbar pr-1">
+                  {daftarMustahiq.map((m, idx) => (
+                    <div key={idx} className="flex items-center justify-between bg-white border border-gray-100 p-2 rounded-lg text-[11px] font-bold text-gray-700 shadow-sm">
+                      <span>{idx + 1}. {m}</span>
+                      <button onClick={() => removeMustahiq(idx)} className="text-red-400 hover:text-red-600 p-1">
+                        <FiTrash2 />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* Partner Override Section */}
@@ -198,7 +315,10 @@ export default function AdminPage() {
                 <input 
                   type="checkbox" 
                   checked={isAutoRotatePartner}
-                  onChange={(e) => saveGlobalSettings('is_auto_rotate_partner', e.target.checked)}
+                  onChange={(e) => {
+                    setIsAutoRotatePartner(e.target.checked);
+                    saveSettingsToDB({ is_auto_rotate_partner: e.target.checked });
+                  }}
                   className="sr-only peer" 
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
@@ -210,10 +330,11 @@ export default function AdminPage() {
                 <p className="text-xs text-gray-500 mb-3 font-medium flex items-center gap-2">
                   <FiRefreshCw className="text-blue-500 animate-spin-slow" /> Sedang mode otomatis. Ini pasangan minggu ini:
                 </p>
-                <div className="space-y-2 h-48 overflow-y-auto custom-scrollbar pr-2">
+                <div className="space-y-2 max-h-56 overflow-y-auto custom-scrollbar pr-2">
                   {currentActiveGroups.map((g, idx) => (
-                    <div key={idx} className="text-[11px] font-bold text-gray-700 bg-white p-2 rounded-lg border border-gray-100">
-                      Kelompok {idx + 1}: {g[0]} &amp; {g[1]}
+                    <div key={idx} className="text-[11px] font-bold text-gray-700 bg-white p-2 rounded-lg border border-gray-100 flex flex-col gap-1 shadow-sm">
+                      <span className="text-[9px] text-blue-500 font-black">KELOMPOK {idx + 1}</span>
+                      <span>{g[0]} &amp; {g[1]}</span>
                     </div>
                   ))}
                 </div>
@@ -223,41 +344,33 @@ export default function AdminPage() {
                 <p className="text-xs text-red-500 mb-3 font-bold">
                   Mode manual aktif. Abang bebas meracik pasangan kelompok di bawah ini:
                 </p>
-                <div className="space-y-3 max-h-72 overflow-y-auto custom-scrollbar pr-2 mb-4">
+                <div className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2 mb-4 pb-16">
                   {manualGroups.map((group, gIdx) => (
                     <div key={gIdx} className="bg-blue-50/30 p-3 rounded-xl border border-blue-100">
                       <div className="text-[10px] font-black text-blue-700 uppercase mb-2">Kelompok {gIdx + 1}</div>
                       <div className="space-y-2">
-                        <div className="relative">
-                          <select 
-                            className="appearance-none w-full bg-white border border-blue-200 text-xs px-4 py-3 rounded-xl font-extrabold text-blue-900 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 transition-all cursor-pointer pr-10 hover:border-blue-300"
-                            value={group[0]}
-                            onChange={(e) => handleGroupChange(gIdx, 0, e.target.value)}
-                          >
-                            {SEMUA_BAPAK.map(b => <option key={b} value={b}>{b}</option>)}
-                          </select>
-                          <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none w-4 h-4" />
-                        </div>
-                        <div className="relative mt-2">
-                          <select 
-                            className="appearance-none w-full bg-white border border-blue-200 text-xs px-4 py-3 rounded-xl font-extrabold text-blue-900 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-400 transition-all cursor-pointer pr-10 hover:border-blue-300"
-                            value={group[1]}
-                            onChange={(e) => handleGroupChange(gIdx, 1, e.target.value)}
-                          >
-                            {SEMUA_BAPAK.map(b => <option key={b} value={b}>{b}</option>)}
-                          </select>
-                          <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400 pointer-events-none w-4 h-4" />
-                        </div>
+                        <GlassDropdown 
+                          value={group[0]} 
+                          options={MUSTAHIQ_OPTIONS} 
+                          onChange={(val) => handleGroupChange(gIdx, 0, val)} 
+                        />
+                        <GlassDropdown 
+                          value={group[1]} 
+                          options={MUSTAHIQ_OPTIONS} 
+                          onChange={(val) => handleGroupChange(gIdx, 1, val)} 
+                        />
                       </div>
                     </div>
                   ))}
                 </div>
-                <button 
-                  onClick={saveManualGroups}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-extrabold rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
-                >
-                  <FiSave /> Simpan Formasi Kelompok
-                </button>
+                <div className="absolute bottom-0 left-0 w-full pt-4 bg-gradient-to-t from-white via-white to-transparent">
+                  <button 
+                    onClick={saveManualGroups}
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white text-[14px] font-extrabold rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2"
+                  >
+                    <FiSave /> Simpan Formasi Kelompok
+                  </button>
+                </div>
               </div>
             )}
           </section>
@@ -318,7 +431,7 @@ export default function AdminPage() {
 
               {!isLibur && (
                 <div className="space-y-2 h-64 overflow-y-auto pr-2 custom-scrollbar bg-gray-50/50 p-2 rounded-2xl border border-gray-100">
-                  {SEMUA_BAPAK.map(bapak => (
+                  {daftarMustahiq.map(bapak => (
                     <label key={bapak} className="group flex items-center gap-4 bg-white px-4 py-3.5 rounded-xl font-bold text-gray-700 shadow-sm border border-blue-50/50 text-[14px] cursor-pointer hover:shadow-md hover:border-blue-200 transition-all">
                       <div className="relative flex items-center">
                         <input

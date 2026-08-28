@@ -35,8 +35,7 @@ export const getActiveAlbaqorohTeam = () => {
     : { label: "TIM 2", anggota: TIM_ALBAQOROH_2 };
 };
 
-// Fallback logic for auto-calculating Musylail shift when no database entry is found
-export const getMusylailShiftIndexAuto = (targetDate, isMalamSabtuActive, anchorDate = new Date(2026, 4, 25)) => {
+export const getMusylailShiftIndexAuto = (targetDate, globalSettings, anchorDate = new Date(2026, 4, 25)) => {
   const start = new Date(anchorDate);
   start.setHours(0,0,0,0);
   
@@ -45,19 +44,29 @@ export const getMusylailShiftIndexAuto = (targetDate, isMalamSabtuActive, anchor
   
   let activeDaysPassed = 0;
   
+  // Default active days: Sun, Mon, Tue, Wed, Sat (0,1,2,3,6)
+  let activeDays = [0, 1, 2, 3, 6]; 
+  if (globalSettings?.hari_aktif_musylail) {
+    activeDays = globalSettings.hari_aktif_musylail;
+  } else if (globalSettings?.is_malam_sabtu_active) {
+    activeDays = [0, 1, 2, 3, 5, 6];
+  }
+  
   if (target > start) {
     let curr = new Date(start);
     curr.setDate(curr.getDate() + 1);
     while (curr <= target) {
-      const d = curr.getDay();
-      const isJumat = d === 4;
-      const isSabtu = d === 5;
-      if (!isJumat && (!isSabtu || isMalamSabtuActive)) {
+      if (activeDays.includes(curr.getDay())) {
         activeDaysPassed++;
       }
       curr.setDate(curr.getDate() + 1);
     }
-    return activeDaysPassed % 6;
+    
+    // Determine modulus based on how many groups there are
+    const daftarMustahiq = globalSettings?.daftar_mustahiq || SEMUA_BAPAK;
+    const numGroups = Math.ceil(daftarMustahiq.length / 2);
+    
+    return activeDaysPassed % (numGroups || 1);
   } else {
     return 0;
   }
@@ -80,16 +89,27 @@ export const getMusylailGroups = (settings, targetDate) => {
   const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
   const periodsPassed = Math.floor(diffWeeks / 2); // Rotate every 2 weeks
   
-  const offset = periodsPassed % 6;
+  const daftarMustahiq = settings?.daftar_mustahiq || SEMUA_BAPAK;
+  const numGroups = Math.ceil(daftarMustahiq.length / 2);
+  
+  // Split into two columns dynamically
+  const columnA = [];
+  const columnB = [];
+  
+  for (let i = 0; i < numGroups; i++) {
+    columnA.push(daftarMustahiq[i] || "Kosong");
+    columnB.push(daftarMustahiq[i + numGroups] || "Kosong");
+  }
 
-  const columnA = SHIFT_MUSYLAIL.map(g => g[0]);
-  const columnB = SHIFT_MUSYLAIL.map(g => g[1]);
+  const offset = periodsPassed % (numGroups || 1);
 
   const dynamicGroups = [];
-  for (let i = 0; i < 6; i++) {
-    const partnerIndex = (i + offset) % 6;
+  for (let i = 0; i < numGroups; i++) {
+    const partnerIndex = (i + offset) % numGroups;
     dynamicGroups.push([columnA[i], columnB[partnerIndex]]);
   }
   
   return dynamicGroups;
 };
+
+
