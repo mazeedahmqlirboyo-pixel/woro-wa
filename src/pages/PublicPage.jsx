@@ -159,8 +159,9 @@ export default function PublicPage() {
         setPetugasMalamIni([]);
         setSelectedPetugas([]);
       } else {
-        const shiftIndex = getMusylailShiftIndexAuto(selectedDateMusylail, isMalamSabtuActive);
-        const petugasHariIni = SHIFT_MUSYLAIL[shiftIndex];
+        const shiftIndex = getMusylailShiftIndexAuto(selectedDateMusylail, globalSettings);
+        const currentGroups = getMusylailGroups(globalSettings, selectedDateMusylail);
+        const petugasHariIni = currentGroups[shiftIndex] || [];
         setPetugasMalamIni(petugasHariIni);
         setSelectedPetugas(petugasHariIni);
       }
