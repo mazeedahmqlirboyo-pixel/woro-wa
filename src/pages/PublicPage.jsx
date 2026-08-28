@@ -321,7 +321,7 @@ export default function PublicPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-blue-100 via-white to-sky-100 flex flex-col items-center pb-8 font-sans selection:bg-blue-200 selection:text-blue-900">
+    <div className="min-h-screen bg-blue-50 flex flex-col items-center pb-8 font-sans selection:bg-blue-200 selection:text-blue-900">
       
       {/* Admin Link at the very top */}
       <div className="w-full max-w-md flex justify-end px-4 py-2 relative z-[60]">
@@ -403,11 +403,11 @@ export default function PublicPage() {
         {/* Header - Sticky */}
         <header id="header" className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-white/50">
           <div className="flex items-center gap-4 px-6 pt-6 pb-5">
-            <div className="bg-gradient-to-br from-blue-500 to-sky-600 p-3 rounded-2xl shadow-lg shadow-blue-200">
+            <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-200">
               <FiCalendar className="text-2xl text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-blue-800 to-sky-800 leading-tight">Pengumuman</h1>
+              <h1 className="text-2xl font-black text-blue-800 leading-tight">Pengumuman</h1>
               <p className="text-xs text-blue-500/80 font-bold tracking-[0.2em] uppercase mt-0.5">PP. ALBAQOROH</p>
             </div>
           </div>
@@ -427,7 +427,7 @@ export default function PublicPage() {
           {/* VIEW: JAGA MUSYLAIL */}
           {activeTab === 'musylail' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <section className="bg-gradient-to-br from-blue-50 to-white border border-blue-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+              <section className="bg-white border border-blue-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
                 <h2 className="text-xs font-black text-center text-blue-400 tracking-[0.2em] mb-3 uppercase relative z-10">Piket Malam Musylail</h2>
                 
@@ -514,7 +514,7 @@ export default function PublicPage() {
               <section>
                 <button
                   onClick={handleGenerateMusylail}
-                  className="w-full py-4 bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-blue-200 flex justify-center items-center gap-3 transition-all"
+                  className="w-full py-4 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-blue-200 flex justify-center items-center gap-3 transition-all"
                 >
                   <FiRefreshCw className={`text-xl ${messageMusylail ? "" : "animate-spin-slow"}`} />
                   Generate Pesan Musylail
@@ -526,7 +526,7 @@ export default function PublicPage() {
                   <FiEdit3 className="text-lg" /> Preview & Edit
                 </h2>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-200 to-sky-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                  <div className="absolute -inset-0.5 bg-blue-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                   <textarea
                     className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-blue-100 focus:border-blue-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
                     placeholder="Pesan akan muncul di sini..."
@@ -611,7 +611,7 @@ export default function PublicPage() {
           {/* VIEW: EXTRA PAGI */}
           {activeTab === 'extra' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <section className="bg-gradient-to-br from-amber-50 to-white border border-amber-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+              <section className="bg-white border border-amber-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
                 <h2 className="text-xs font-black text-center text-amber-500 tracking-[0.2em] mb-3 uppercase relative z-10">Piket Extra Pagi</h2>
                 
@@ -687,7 +687,7 @@ export default function PublicPage() {
               <section>
                 <button
                   onClick={handleGenerateExtra}
-                  className="w-full py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-amber-200 flex justify-center items-center gap-3 transition-all"
+                  className="w-full py-4 bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-amber-200 flex justify-center items-center gap-3 transition-all"
                 >
                   <FiRefreshCw className={`text-xl ${messageExtra ? "" : "animate-spin-slow"}`} />
                   Generate Pesan Extra Pagi
@@ -699,7 +699,7 @@ export default function PublicPage() {
                   <FiEdit3 className="text-lg" /> Preview & Edit
                 </h2>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-200 to-orange-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                  <div className="absolute -inset-0.5 bg-amber-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                   <textarea
                     className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-amber-100 focus:border-amber-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
                     placeholder="Pesan Extra otomatis muncul di sini..."
@@ -727,7 +727,7 @@ export default function PublicPage() {
           {/* VIEW: SOROGAN HMQ */}
           {activeTab === 'hmq' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <section className="bg-gradient-to-br from-emerald-50 to-white border border-emerald-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+              <section className="bg-white border border-emerald-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
                 <h2 className="text-xs font-black text-center text-emerald-500 tracking-[0.2em] mb-4 uppercase flex items-center justify-center gap-2 relative z-10">
                   <FiBookOpen className="text-sm" /> Sorogan HMQ
@@ -769,7 +769,7 @@ export default function PublicPage() {
               <section>
                 <button
                   onClick={handleGenerateHmq}
-                  className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-emerald-200 flex justify-center items-center gap-3 transition-all"
+                  className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-emerald-200 flex justify-center items-center gap-3 transition-all"
                 >
                   <FiRefreshCw className={`text-xl ${messageHmq ? "" : "animate-spin-slow"}`} />
                   Generate Pesan Sorogan HMQ
@@ -781,7 +781,7 @@ export default function PublicPage() {
                   <FiEdit3 className="text-lg" /> Preview & Edit
                 </h2>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-200 to-teal-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                  <div className="absolute -inset-0.5 bg-emerald-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                   <textarea
                     className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-emerald-100 focus:border-emerald-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
                     placeholder="Pesan HMQ otomatis muncul di sini..."
@@ -809,7 +809,7 @@ export default function PublicPage() {
           {/* VIEW: SOROGAN AL-BAQOROH */}
           {activeTab === 'albaqoroh' && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-              <section className="bg-gradient-to-br from-sky-50 to-white border border-sky-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+              <section className="bg-white border border-sky-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-sky-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
                 <h2 className="text-xs font-black text-center text-sky-500 tracking-[0.2em] mb-4 uppercase flex items-center justify-center gap-2 relative z-10">
                   <FiBookOpen className="text-sm" /> Opsi AL-BAQOROH
@@ -855,7 +855,7 @@ export default function PublicPage() {
               <section>
                 <button
                   onClick={handleGenerateAlbaqoroh}
-                  className="w-full py-4 bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-400 hover:to-blue-400 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-sky-200 flex justify-center items-center gap-3 transition-all"
+                  className="w-full py-4 bg-sky-500 hover:bg-sky-600 active:scale-[0.98] text-white font-extrabold text-[16px] rounded-2xl shadow-lg shadow-sky-200 flex justify-center items-center gap-3 transition-all"
                 >
                   <FiRefreshCw className={`text-xl ${messageAlbaqoroh ? "" : "animate-spin-slow"}`} />
                   Generate Pesan Sorogan Al-Baqoroh
@@ -867,7 +867,7 @@ export default function PublicPage() {
                   <FiEdit3 className="text-lg" /> Preview & Edit
                 </h2>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-200 to-blue-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+                  <div className="absolute -inset-0.5 bg-sky-200 rounded-[1.5rem] blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
                   <textarea
                     className="relative w-full min-h-[220px] bg-white border border-gray-100 text-gray-700 text-[15px] font-medium rounded-3xl focus:ring-4 focus:ring-sky-100 focus:border-sky-300 block p-5 outline-none resize-none leading-relaxed shadow-sm transition-all"
                     placeholder="Pesan Al-Baqoroh otomatis muncul di sini..."
