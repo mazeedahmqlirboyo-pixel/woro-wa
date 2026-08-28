@@ -92,8 +92,9 @@ export const getMusylailGroups = (settings, targetDate) => {
     return settings.manual_groups;
   }
 
-  // Anchor date diubah ke HARI INI (29 Agustus 2026) agar acakan pertama dimulai sekarang.
-  const anchorDate = new Date(2026, 7, 29);
+  // Anchor date dinamis dari DB, fallback ke 29 Agustus 2026
+  const anchorDateStr = settings?.anchor_date;
+  const anchorDate = anchorDateStr ? new Date(anchorDateStr) : new Date(2026, 7, 29);
   anchorDate.setHours(0,0,0,0);
   
   const target = new Date(targetDate || new Date());
@@ -185,8 +186,9 @@ export const getMusylailGroups = (settings, targetDate) => {
   return dynamicGroups;
 };
 
-export const getDaysUntilNextRotation = (targetDate) => {
-  const anchorDate = new Date(2026, 7, 29);
+export const getDaysUntilNextRotation = (targetDate, globalSettings) => {
+  const anchorDateStr = globalSettings?.anchor_date;
+  const anchorDate = anchorDateStr ? new Date(anchorDateStr) : new Date(2026, 7, 29);
   anchorDate.setHours(0,0,0,0);
   
   const target = new Date(targetDate || new Date());

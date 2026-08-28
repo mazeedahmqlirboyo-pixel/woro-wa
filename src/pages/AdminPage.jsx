@@ -360,14 +360,15 @@ export default function AdminPage() {
                   <p className="text-xs text-gray-500 font-medium flex flex-col gap-1">
                     <span className="flex items-center gap-2"><FiRefreshCw className="text-blue-500 animate-spin-slow" /> Sedang mode otomatis. Ini pasangan minggu ini:</span>
                     <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-1 rounded w-fit border border-gray-200">
-                      Sisa <b>{getDaysUntilNextRotation(new Date())} hari</b> sebelum rotasi berikutnya
+                      Sisa <b>{getDaysUntilNextRotation(new Date(), globalSettings)} hari</b> sebelum rotasi berikutnya
                     </span>
                   </p>
                   <button 
                     onClick={() => {
                       const randomSeed = Math.floor(Math.random() * 10000);
-                      saveSettingsToDB({ seed_offset: randomSeed });
-                      setGlobalSettings(prev => ({ ...prev, seed_offset: randomSeed }));
+                      const nowStr = new Date().toISOString();
+                      saveSettingsToDB({ seed_offset: randomSeed, anchor_date: nowStr });
+                      setGlobalSettings(prev => ({ ...prev, seed_offset: randomSeed, anchor_date: nowStr }));
                     }}
                     className="flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-50 transition-colors shadow-sm w-fit"
                   >
