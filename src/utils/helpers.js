@@ -77,7 +77,8 @@ export const getMusylailGroups = (settings, targetDate) => {
     return settings.manual_groups;
   }
 
-  const anchorDate = new Date(2026, 4, 11); // Digeser 2 minggu lebih awal agar rotasi (offset) berjalan hari ini
+  // Anchor date diubah ke HARI INI (29 Agustus 2026) agar acakan pertama dimulai sekarang.
+  const anchorDate = new Date(2026, 7, 29);
   anchorDate.setHours(0,0,0,0);
   
   const target = new Date(targetDate || new Date());
@@ -87,26 +88,39 @@ export const getMusylailGroups = (settings, targetDate) => {
   if (diffTime < 0) diffTime = 0;
   
   const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
-  const periodsPassed = Math.floor(diffWeeks / 2); // Rotate every 2 weeks
+  const periodsPassed = Math.floor(diffWeeks / 2); // Acak setiap 2 minggu
   
   const daftarMustahiq = settings?.daftar_mustahiq || SEMUA_BAPAK;
-  const numGroups = Math.ceil(daftarMustahiq.length / 2);
   
-  // Split into two columns dynamically
-  const columnA = [];
-  const columnB = [];
-  
-  for (let i = 0; i < numGroups; i++) {
-    columnA.push(daftarMustahiq[i] || "Kosong");
-    columnB.push(daftarMustahiq[i + numGroups] || "Kosong");
-  }
+  // Fungsi Seeded Random (Biar hasil acakan tetap sama selama periode 2 minggu tersebut)
+  const mulberry32 = (a) => {
+    return function() {
+      var t = a += 0x6D2B79F5;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    }
+  };
 
-  const offset = periodsPassed % (numGroups || 1);
+  const seededShuffle = (array, seed) => {
+    const prng = mulberry32(seed);
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(prng() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Acak daftar nama menggunakan periodsPassed sebagai seed
+  // Tambahkan angka acak (misal 54321) agar urutannya sangat berbeda dari urutan asli
+  const shuffledList = seededShuffle(daftarMustahiq, periodsPassed + 54321);
 
   const dynamicGroups = [];
-  for (let i = 0; i < numGroups; i++) {
-    const partnerIndex = (i + offset) % numGroups;
-    dynamicGroups.push([columnA[i], columnB[partnerIndex]]);
+  for (let i = 0; i < shuffledList.length; i += 2) {
+    const p1 = shuffledList[i];
+    const p2 = i + 1 < shuffledList.length ? shuffledList[i + 1] : "Kosong";
+    dynamicGroups.push([p1, p2]);
   }
   
   return dynamicGroups;
