@@ -325,7 +325,7 @@ export default function PublicPage() {
       } else {
         isOff = isJumat || (isSabtu && !isMalamSabtuActive);
         if (!isOff) {
-          const shiftIndex = getMusylailShiftIndexAuto(d, isMalamSabtuActive);
+          const shiftIndex = getMusylailShiftIndexAuto(d, globalSettings);
           const currentGroups = getMusylailGroups(globalSettings, d);
           petugas = currentGroups[shiftIndex];
         }
