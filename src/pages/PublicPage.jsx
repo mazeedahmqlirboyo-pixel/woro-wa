@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy, FiInfo } from 'react-icons/fi';
+import logoWoro from '../assets/512.png.png';
 import { supabase } from '../supabaseClient';
 import { 
   TARGET_PHONE, SHIFT_MUSYLAIL, LABEL_MALAM, SEMUA_BAPAK, GREETINGS, 
@@ -403,12 +404,10 @@ export default function PublicPage() {
         {/* Header - Sticky */}
         <header id="header" className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-white/50">
           <div className="flex items-center gap-4 px-6 pt-6 pb-5">
-            <div className="bg-blue-600 p-3 rounded-2xl shadow-lg shadow-blue-200">
-              <FiCalendar className="text-2xl text-white" />
-            </div>
+            <img src={logoWoro} alt="Logo Mazeeda" className="w-14 h-14 rounded-2xl shadow-lg shadow-blue-200 object-cover border border-blue-50" />
             <div>
-              <h1 className="text-2xl font-black text-blue-800 leading-tight">Pengumuman</h1>
-              <p className="text-xs text-blue-500/80 font-bold tracking-[0.2em] uppercase mt-0.5">PP. ALBAQOROH</p>
+              <h1 className="text-xl font-black text-blue-800 leading-tight">MAZEEDA WORO-WORO</h1>
+              <p className="text-[10px] text-blue-500/80 font-bold tracking-[0.2em] uppercase mt-0.5">PENGUMUMAN & PIKET</p>
             </div>
           </div>
 
