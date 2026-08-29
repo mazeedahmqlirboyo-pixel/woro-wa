@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy, FiInfo, FiLock, FiMoon, FiSun, FiBook, FiUsers } from 'react-icons/fi';
+import { FiCalendar, FiRefreshCw, FiEdit3, FiCheckSquare, FiBookOpen, FiCopy, FiInfo, FiLock, FiMoon, FiSun, FiBook, FiUsers, FiSettings } from 'react-icons/fi';
 import logoWoro from '../assets/512.png.png';
 import { supabase } from '../supabaseClient';
 import { 
@@ -140,8 +140,10 @@ export default function PublicPage() {
   useEffect(() => {
     const dayIndex = selectedDateMusylail.getDay();
     const dateStr = selectedDateMusylail.toISOString().split('T')[0];
-    const isJumat = dayIndex === 4;
-    const isSabtu = dayIndex === 5;
+    
+    // Check dynamic active days
+    const activeDays = (globalSettings?.hari_aktif_musylail || (isMalamSabtuActive ? [0, 1, 2, 3, 5, 6] : [0, 1, 2, 3, 6])).filter(d => d !== 4);
+    const isLiburActiveDay = !activeDays.includes(dayIndex);
     
     setMalamIni(LABEL_MALAM[dayIndex]);
 
@@ -155,7 +157,7 @@ export default function PublicPage() {
         setSelectedPetugas(manual.petugas || []);
       }
     } else {
-      if (isJumat || (isSabtu && !isMalamSabtuActive)) {
+      if (isLiburActiveDay) {
         setPetugasMalamIni([]);
         setSelectedPetugas([]);
       } else {
@@ -167,7 +169,7 @@ export default function PublicPage() {
       }
     }
     setMessageMusylail('');
-  }, [selectedDateMusylail, isMalamSabtuActive, jadwalMusylailManual]);
+  }, [selectedDateMusylail, isMalamSabtuActive, jadwalMusylailManual, globalSettings]);
 
   useEffect(() => {
     const dayIndex = selectedDateExtra.getDay();
@@ -186,10 +188,11 @@ export default function PublicPage() {
   }, [selectedDateExtra, jadwalExtra]);
 
   useEffect(() => {
-    const albaqorohTeam = getActiveAlbaqorohTeam();
+    const albaqAnchorObj = jadwalMusylailManual['2099-01-01'] || null;
+    const albaqorohTeam = getActiveAlbaqorohTeam(albaqAnchorObj);
     setTimAktifAlbaqorohLabel(albaqorohTeam.label);
     setSelectedAlbaqoroh(albaqorohTeam.anggota);
-  }, []);
+  }, [jadwalMusylailManual]);
 
   const getRandomGreeting = () => GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
   const pray = String.fromCodePoint(0x1F64F);
@@ -312,9 +315,9 @@ export default function PublicPage() {
       const d = new Date(startDate);
       d.setDate(startDate.getDate() + i);
       const dayIndex = d.getDay();
-      const isJumat = dayIndex === 4;
-      const isSabtu = dayIndex === 5;
       const dateStr = d.toISOString().split('T')[0];
+      
+      const activeDays = (globalSettings?.hari_aktif_musylail || (isMalamSabtuActive ? [0, 1, 2, 3, 5, 6] : [0, 1, 2, 3, 6])).filter(x => x !== 4);
       
       let isOff = false;
       let petugas = [];
@@ -324,7 +327,7 @@ export default function PublicPage() {
         isOff = manual.is_libur;
         petugas = manual.petugas || [];
       } else {
-        isOff = isJumat || (isSabtu && !isMalamSabtuActive);
+        isOff = !activeDays.includes(dayIndex);
         if (!isOff) {
           const shiftIndex = getMusylailShiftIndexAuto(d, globalSettings);
           const currentGroups = getMusylailGroups(globalSettings, d);
@@ -423,14 +426,11 @@ export default function PublicPage() {
               <img src={logoWoro} alt="Logo Mazeeda" className="w-14 h-14 rounded-2xl shadow-lg shadow-blue-200 object-cover border border-blue-50" />
               <div>
                 <h1 className="text-xl font-black text-blue-800 leading-tight">MAZEEDA WORO-WORO</h1>
-                <p className="text-[10px] text-blue-500/80 font-bold tracking-[0.2em] uppercase mt-0.5">PENGUMUMAN & PIKET</p>
+                <p className="text-[10px] text-blue-500/80 font-bold tracking-[0.2em] uppercase mt-0.5">PENGUMUMAN PENTING</p>
               </div>
             </div>
             
-            {/* Disguised Admin Link */}
-            <Link to="/admin" className="p-2 text-blue-800/5 hover:text-blue-800/30 transition-colors" title="Admin Panel">
-              <FiLock className="w-4 h-4" />
-            </Link>
+            <div className="w-8"></div> {/* Spacer to keep title centered because we removed the right icon */}
           </div>
 
         </header>
@@ -442,7 +442,7 @@ export default function PublicPage() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
               <section className="bg-white border border-blue-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <h2 className="text-xs font-black text-center text-blue-400 tracking-[0.2em] mb-3 uppercase relative z-10">Piket Malam Musylail</h2>
+                <h2 className="text-xs font-black text-center text-blue-400 tracking-[0.2em] mb-3 uppercase relative z-10">JAGA MUSYLAIL AL-BAQOROH</h2>
                 
                 {/* Navigasi Tanggal */}
                 <div className="flex items-center justify-between gap-2 mb-4 bg-blue-950/5 p-2 rounded-2xl relative z-10">
@@ -626,7 +626,7 @@ export default function PublicPage() {
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
               <section className="bg-white border border-blue-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
-                <h2 className="text-xs font-black text-center text-blue-500 tracking-[0.2em] mb-3 uppercase relative z-10">Piket Extra Pagi</h2>
+                <h2 className="text-xs font-black text-center text-blue-500 tracking-[0.2em] mb-3 uppercase relative z-10">NGAJI EXTRA PAGI</h2>
                 
                 {/* Navigasi Tanggal */}
                 <div className="flex items-center justify-between gap-2 mb-4 bg-blue-950/5 p-2 rounded-2xl relative z-10">
@@ -743,7 +743,7 @@ export default function PublicPage() {
               <section className="bg-white border border-blue-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
                 <h2 className="text-xs font-black text-center text-blue-500 tracking-[0.2em] mb-4 uppercase flex items-center justify-center gap-2 relative z-10">
-                  <FiBookOpen className="text-sm" /> Sorogan HMQ
+                  Sorogan HMQ
                 </h2>
 
                 <div className="space-y-3 h-80 overflow-y-auto pr-2 custom-scrollbar relative z-10">
@@ -825,7 +825,7 @@ export default function PublicPage() {
               <section className="bg-white border border-blue-100/50 rounded-3xl p-6 shadow-sm relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/40 rounded-full blur-3xl -mr-10 -mt-10"></div>
                 <h2 className="text-xs font-black text-center text-blue-500 tracking-[0.2em] mb-4 uppercase flex items-center justify-center gap-2 relative z-10">
-                  <FiBookOpen className="text-sm" /> Opsi AL-BAQOROH
+                  SOROGAN AL-BAQOROH
                 </h2>
 
                 <div className="space-y-3 h-80 overflow-y-auto pr-2 custom-scrollbar relative z-10">
@@ -912,9 +912,14 @@ export default function PublicPage() {
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-3rem)] max-w-md pointer-events-none">
         <div className="flex justify-between items-center bg-white/75 backdrop-blur-2xl px-2 py-2.5 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/60 pointer-events-auto">
           {renderTabButton('musylail', 'Musylail', FiMoon)}
-          {renderTabButton('extra', 'Extra Pagi', FiSun)}
-          {renderTabButton('hmq', 'Sorogan HMQ', FiBook)}
-          {renderTabButton('albaqoroh', 'S. Al-Baq', FiUsers)}
+          {renderTabButton('extra', 'Extra', FiSun)}
+          {renderTabButton('hmq', 'HMQ', FiBook)}
+          {renderTabButton('albaqoroh', 'Al-Baqoroh', FiUsers)}
+          
+          <Link to="/admin" className="flex flex-col items-center justify-center gap-1 flex-1 py-1.5 transition-all duration-300 relative text-gray-400 hover:text-blue-400">
+            <FiSettings className="text-[22px]" />
+            <span className="text-[9px] font-bold tracking-wide opacity-70">Setting</span>
+          </Link>
         </div>
       </div>
 

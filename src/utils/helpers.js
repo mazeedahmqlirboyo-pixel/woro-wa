@@ -34,20 +34,33 @@ export const isToday = (date) => {
          d.getFullYear() === today.getFullYear();
 };
 
-export const getActiveAlbaqorohTeam = () => {
-  const start = new Date(2026, 4, 25); // 25 Mei 2026 (Senin)
+export const getActiveAlbaqorohTeam = (anchorObj = null, targetDate = new Date()) => {
+  let start = new Date(2026, 4, 25); // 25 Mei 2026 (Senin)
+  let anchorTeam = "TIM 1";
+
+  if (anchorObj && anchorObj.tanggal && anchorObj.petugas) {
+    start = new Date(anchorObj.petugas[0]); // Format iso string
+    anchorTeam = anchorObj.petugas[1];
+  }
   start.setHours(0,0,0,0);
-  const today = new Date();
+  
+  const today = new Date(targetDate);
   today.setHours(0,0,0,0);
   
   const diffTime = today - start;
   const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
   
-  if (diffWeeks < 0) return { label: "TIM 1", anggota: TIM_ALBAQOROH_1 };
+  const isTeam1Start = anchorTeam === "TIM 1";
   
-  return diffWeeks % 2 === 0 
-    ? { label: "TIM 1", anggota: TIM_ALBAQOROH_1 }
-    : { label: "TIM 2", anggota: TIM_ALBAQOROH_2 };
+  if (diffWeeks < 0) return { label: anchorTeam, anggota: isTeam1Start ? TIM_ALBAQOROH_1 : TIM_ALBAQOROH_2 };
+  
+  const isOddWeek = diffWeeks % 2 !== 0; // True means active team swapped
+  
+  if (isTeam1Start) {
+    return isOddWeek ? { label: "TIM 2", anggota: TIM_ALBAQOROH_2 } : { label: "TIM 1", anggota: TIM_ALBAQOROH_1 };
+  } else {
+    return isOddWeek ? { label: "TIM 1", anggota: TIM_ALBAQOROH_1 } : { label: "TIM 2", anggota: TIM_ALBAQOROH_2 };
+  }
 };
 
 export const getMusylailShiftIndexAuto = (targetDate, globalSettings) => {
@@ -67,6 +80,9 @@ export const getMusylailShiftIndexAuto = (targetDate, globalSettings) => {
   } else if (globalSettings?.is_malam_sabtu_active) {
     activeDays = [0, 1, 2, 3, 5, 6];
   }
+  
+  // Hardcode: Malam Jumat (4) is ALWAYS OFF
+  activeDays = activeDays.filter(d => d !== 4);
   
   if (target > start) {
     let curr = new Date(start);

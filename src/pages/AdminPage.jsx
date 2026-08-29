@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { FiHome, FiSettings, FiCalendar, FiCheckSquare, FiInfo, FiTrash2, FiSave, FiUsers, FiRefreshCw, FiChevronDown, FiPlus, FiX } from 'react-icons/fi';
+import { FiHome, FiSettings, FiCalendar, FiCheckSquare, FiInfo, FiTrash2, FiSave, FiUsers, FiRefreshCw, FiChevronDown, FiPlus, FiX, FiLock } from 'react-icons/fi';
 import { supabase } from '../supabaseClient';
 import { LABEL_MALAM, SEMUA_BAPAK } from '../utils/constants';
-import { formatDateIndo, getMusylailGroups, getDaysUntilNextRotation } from '../utils/helpers';
+import { formatDateIndo, getMusylailGroups, getDaysUntilNextRotation, getActiveAlbaqorohTeam } from '../utils/helpers';
 import logoWoro from '../assets/512.png.png';
 
 const GlassDropdown = ({ value, options, onChange }) => {
@@ -74,6 +74,18 @@ export default function AdminPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const checkSession = async () => {
+    const { data } = await supabase.auth.getSession();
+    setIsLoggedIn(!!data?.session);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsLoggedIn(false);
+    showToast('Sesi admin berhasil dikunci (Logout)!');
+  };
 
   // Daily Schedule States
   const [selectedDate, setSelectedDate] = useState(() => new Date());
@@ -81,6 +93,7 @@ export default function AdminPage() {
   // State manual override for the selected date
   const [manualPetugas, setManualPetugas] = useState([]);
   const [isLibur, setIsLibur] = useState(false);
+  const [albaqorohAnchorObj, setAlbaqorohAnchorObj] = useState(null);
   
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
@@ -91,6 +104,8 @@ export default function AdminPage() {
 
   useEffect(() => {
     fetchGlobalSettings();
+    fetchAlbaqorohState();
+    checkSession();
   }, []);
 
   useEffect(() => {
@@ -116,7 +131,7 @@ export default function AdminPage() {
       setIsAutoRotatePartner(data.is_auto_rotate_partner ?? true);
       
       if (data.hari_aktif_musylail) {
-        setHariAktif(data.hari_aktif_musylail);
+        setHariAktif(data.hari_aktif_musylail.filter(d => d !== 4));
       } else if (data.is_malam_sabtu_active) {
         setHariAktif([0, 1, 2, 3, 5, 6]);
       }
@@ -141,6 +156,28 @@ export default function AdminPage() {
     }
   };
 
+  const fetchAlbaqorohState = async () => {
+    const { data } = await supabase.from('jadwal_musylail').select('*').eq('tanggal', '2099-01-01').maybeSingle();
+    setAlbaqorohAnchorObj(data || null);
+  };
+
+  const saveAlbaqorohAnchor = async (teamName) => {
+    const dateStr = new Date().toISOString();
+    const { error } = await supabase.from('jadwal_musylail').upsert({
+      tanggal: '2099-01-01',
+      label_malam: 'ALBAQOROH_STATE',
+      petugas: [dateStr, teamName],
+      is_libur: false
+    }, { onConflict: 'tanggal' });
+    
+    if (!error) {
+      showToast(`Rotasi Sorogan berhasil dikalibrasi ke ${teamName}!`);
+      fetchAlbaqorohState();
+    } else {
+      showToast('Gagal mengkalibrasi rotasi', 'error');
+    }
+  };
+
   const saveSettingsToDB = async (updates) => {
     const { error } = await supabase.from('settings').upsert({ id: 'global', ...updates });
     if (!error) {
@@ -151,27 +188,43 @@ export default function AdminPage() {
     }
   };
 
-  const handleAuthAndAcak = async () => {
+  const [authAction, setAuthAction] = useState(null);
+
+  const requireAuth = async (actionCallback) => {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session) {
+      actionCallback();
+    } else {
+      setAuthAction(() => actionCallback);
+      setShowAuthModal(true);
+    }
+  };
+
+  const submitAuth = async () => {
     if (!adminPassword) return;
     setIsAuthenticating(true);
     
-    const { error } = await supabase.auth.signInWithPassword({
-      email: 'admin@mazeeda.com',
-      password: adminPassword,
-    });
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: 'admin@mazeeda.com',
+        password: adminPassword,
+      });
+      if (error) {
+        showToast('Password salah atau gagal login', 'error');
+        setIsAuthenticating(false);
+        return;
+      }
+    }
     
-    if (error) {
-      showToast('Password salah atau gagal login', 'error');
-      setIsAuthenticating(false);
-    } else {
-      setShowAuthModal(false);
-      setAdminPassword('');
-      setIsAuthenticating(false);
-      
-      const nowStr = new Date().toISOString();
-      saveSettingsToDB({ updated_at: nowStr });
-      setGlobalSettings(prev => ({ ...prev, updated_at: nowStr }));
-      showToast('Rotasi berhasil diacak ulang!', 'success');
+    setIsLoggedIn(true);
+    setShowAuthModal(false);
+    setAdminPassword('');
+    setIsAuthenticating(false);
+    
+    if (authAction) {
+      authAction();
+      setAuthAction(null);
     }
   };
 
@@ -186,16 +239,20 @@ export default function AdminPage() {
 
   const addMustahiq = () => {
     if (!newMustahiq.trim()) return;
-    const newList = [...daftarMustahiq, { nama: newMustahiq.trim(), kategori: newKategori }];
-    setDaftarMustahiq(newList);
-    setNewMustahiq('');
-    saveSettingsToDB({ daftar_mustahiq: newList });
+    requireAuth(() => {
+      const newList = [...daftarMustahiq, { nama: newMustahiq.trim(), kategori: newKategori }];
+      setDaftarMustahiq(newList);
+      setNewMustahiq('');
+      saveSettingsToDB({ daftar_mustahiq: newList });
+    });
   };
 
   const removeMustahiq = (index) => {
-    const newList = daftarMustahiq.filter((_, i) => i !== index);
-    setDaftarMustahiq(newList);
-    saveSettingsToDB({ daftar_mustahiq: newList });
+    requireAuth(() => {
+      const newList = daftarMustahiq.filter((_, i) => i !== index);
+      setDaftarMustahiq(newList);
+      saveSettingsToDB({ daftar_mustahiq: newList });
+    });
   };
 
   const saveManualGroups = async () => {
@@ -249,13 +306,12 @@ export default function AdminPage() {
   const currentActiveGroups = getMusylailGroups(globalSettings, new Date());
   
   const HARI_OPTIONS = [
-    { label: "M. Ahad", val: 0 },
-    { label: "M. Senin", val: 1 },
-    { label: "M. Selasa", val: 2 },
-    { label: "M. Rabu", val: 3 },
-    { label: "M. Kamis", val: 4 },
-    { label: "M. Jumat", val: 5 },
-    { label: "M. Sabtu", val: 6 },
+    { label: "M. Ahad", val: 6 },
+    { label: "M. Senin", val: 0 },
+    { label: "M. Selasa", val: 1 },
+    { label: "M. Rabu", val: 2 },
+    { label: "M. Kamis", val: 3 },
+    { label: "M. Sabtu", val: 5 },
   ];
 
   const MUSTAHIQ_OPTIONS = ["Kosong", ...daftarMustahiq.map(m => m.nama)];
@@ -286,9 +342,16 @@ export default function AdminPage() {
               </div>
             </div>
             
-            <Link to="/" className="p-2 text-blue-600 hover:text-blue-800 bg-blue-100 hover:bg-blue-200 rounded-xl transition-colors" title="Kembali ke Beranda">
-              <FiHome className="w-5 h-5" />
-            </Link>
+            <div className="flex items-center gap-2">
+              {isLoggedIn && (
+                <button onClick={handleLogout} className="p-2 text-white hover:text-white bg-red-500 hover:bg-red-600 rounded-xl transition-colors shadow-sm" title="Kunci Kembali (Logout)">
+                  <FiLock className="w-5 h-5" />
+                </button>
+              )}
+              <Link to="/" className="p-2 text-blue-600 hover:text-blue-800 bg-blue-100 hover:bg-blue-200 rounded-xl transition-colors" title="Kembali ke Beranda">
+                <FiHome className="w-5 h-5" />
+              </Link>
+            </div>
           </div>
         </header>
 
@@ -303,13 +366,13 @@ export default function AdminPage() {
             
             <div className="relative z-10 space-y-5">
               <div>
-                <p className="text-xs font-bold text-gray-700 mb-3">Hari Aktif Piket Musylail:</p>
-                <div className="flex flex-wrap gap-2">
+                <p className="text-xs font-bold text-gray-700 mb-3 text-center">Hari Aktif Piket Musylail:</p>
+                <div className="grid grid-cols-3 gap-2 max-w-[280px] mx-auto">
                   {HARI_OPTIONS.map(hari => (
                     <button
                       key={hari.val}
                       onClick={() => toggleHariAktif(hari.val)}
-                      className={`px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all border ${hariAktif.includes(hari.val) ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200' : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-blue-50'}`}
+                      className={`px-2 py-2 rounded-lg text-[10px] font-bold transition-all border w-full ${hariAktif.includes(hari.val) ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-200' : 'bg-gray-50 text-gray-500 border-gray-200 hover:bg-blue-50'}`}
                     >
                       {hari.label}
                     </button>
@@ -375,8 +438,11 @@ export default function AdminPage() {
                   type="checkbox" 
                   checked={isAutoRotatePartner}
                   onChange={(e) => {
-                    setIsAutoRotatePartner(e.target.checked);
-                    saveSettingsToDB({ is_auto_rotate_partner: e.target.checked });
+                    const checked = e.target.checked;
+                    requireAuth(() => {
+                      setIsAutoRotatePartner(checked);
+                      saveSettingsToDB({ is_auto_rotate_partner: checked });
+                    });
                   }}
                   className="sr-only peer" 
                 />
@@ -394,7 +460,12 @@ export default function AdminPage() {
                     </span>
                   </p>
                   <button 
-                    onClick={() => setShowAuthModal(true)}
+                    onClick={() => requireAuth(() => {
+                      const nowStr = new Date().toISOString();
+                      saveSettingsToDB({ updated_at: nowStr });
+                      setGlobalSettings(prev => ({ ...prev, updated_at: nowStr }));
+                      showToast('Rotasi berhasil diacak ulang!', 'success');
+                    })}
                     className="flex items-center gap-2 bg-white border border-blue-200 text-blue-600 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-50 transition-colors shadow-sm w-fit"
                   >
                     <FiRefreshCw /> Acak Ulang Sekarang
@@ -443,6 +514,37 @@ export default function AdminPage() {
                 </div>
               </div>
             )}
+          </section>
+
+          {/* Pengaturan Sorogan Al-Baqoroh */}
+          <section className="bg-white border border-blue-100 rounded-3xl p-6 shadow-sm relative overflow-hidden">
+            <h2 className="text-xs font-black text-blue-600 tracking-[0.2em] mb-4 uppercase flex items-center gap-2 relative z-10">
+              <FiUsers className="text-lg" /> PENGATURAN AL-BAQOROH
+            </h2>
+            
+            <p className="text-xs text-gray-500 mb-5 leading-relaxed relative z-10 font-medium">
+              Jika minggu ini jadwal Sorogan Libur, abaikan saja. Ketika mau mulai ngaji lagi minggu depan, tinggal ke sini dan klik <strong>Paksa TIM 1</strong> atau <strong>Paksa TIM 2</strong> sesuai jatah yang tertunda.
+            </p>
+
+            <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100 mb-4 text-center relative z-10">
+              <p className="text-blue-800 font-bold text-xs mb-1">Status Minggu Ini (Otomatis):</p>
+              <p className="text-blue-900 font-black text-xl">{getActiveAlbaqorohTeam(albaqorohAnchorObj).label}</p>
+            </div>
+
+            <div className="flex gap-3 relative z-10">
+              <button 
+                onClick={() => saveAlbaqorohAnchor('TIM 1')}
+                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-extrabold rounded-xl shadow-md transition-all active:scale-95"
+              >
+                Paksa TIM 1
+              </button>
+              <button 
+                onClick={() => saveAlbaqorohAnchor('TIM 2')}
+                className="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white text-[13px] font-extrabold rounded-xl shadow-md transition-all active:scale-95"
+              >
+                Paksa TIM 2
+              </button>
+            </div>
           </section>
 
           {/* Daily Override */}
@@ -558,7 +660,7 @@ export default function AdminPage() {
                   onChange={e => setAdminPassword(e.target.value)}
                   onKeyDown={e => {
                     if (e.key === 'Enter' && adminPassword && !isAuthenticating) {
-                      handleAuthAndAcak();
+                      submitAuth();
                     }
                   }}
                   className="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
@@ -570,6 +672,7 @@ export default function AdminPage() {
                   onClick={() => {
                     setShowAuthModal(false);
                     setAdminPassword('');
+                    setAuthAction(null);
                   }}
                   className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-colors"
                   disabled={isAuthenticating}
@@ -577,7 +680,7 @@ export default function AdminPage() {
                   Batal
                 </button>
                 <button 
-                  onClick={handleAuthAndAcak}
+                  onClick={submitAuth}
                   className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
                   disabled={isAuthenticating || !adminPassword}
                 >
